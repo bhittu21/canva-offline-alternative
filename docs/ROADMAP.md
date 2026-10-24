@@ -1,6 +1,6 @@
 # Roadmap
 
-Offline Design Editor is an independent, Canva-inspired desktop design app for
+Offline Design Studio is an independent, Canva-inspired desktop design app for
 Windows. It does not use Canva's code, templates, assets, APIs or servers, and
 it never needs a Canva account.
 
@@ -44,34 +44,39 @@ Legend: **Done** · **In progress** · **Planned** · **Future**
 
 | Feature | Status |
 | --- | --- |
-| Multiple pages per design | Planned |
-| Autosave and crash recovery | Planned |
-| Grouping and ungrouping | Planned |
-| Rulers, guides, align/distribute between elements | Planned |
+| Multiple pages per design (add, duplicate, reorder, delete) | Done |
+| Autosave and crash recovery | Done |
+| Grouping and ungrouping | Done |
+| Rulers, guides, align/distribute between elements | Done |
 | Resized copies with smarter layout (per-element repositioning beyond uniform scaling) | Planned |
 | Vector PDF with selectable text and embedded fonts | Planned |
-| Local template library (original, bundled templates) with categories and preview | Planned |
-| Save your own designs as templates; import template packs | Planned |
-| Asset library: shapes, icons, stickers, illustrations with search, categories, favourites | Planned |
-| Bundled open-licence fonts and use of installed Windows fonts | Planned |
-| Typography: more text styles, lists, spacing | Planned |
+| Local template library (20 original templates) with categories, search and preview | Done |
+| Save your own designs as templates; import template files | Done |
+| Element library (shapes, lines, decorative, callouts, patterns, diagrams, mockups) and about 1,900 Lucide icons with search, categories, favourites, recents | Done |
+| Bundled open-licence fonts (26) | Done |
+| Use installed Windows fonts | Planned |
+| Typography: text combinations, spacing, outline, highlight | Done |
+| Bulleted and numbered lists | Planned |
 
 ### Phase 3: Photo, video and advanced design (Offline)
 
 | Feature | Status |
 | --- | --- |
-| Crop, flip, image resize | Planned |
-| Brightness, contrast, saturation, filters | Planned |
-| Image transparency, masks, shape clipping, frames | Planned |
-| Text effects: shadow, outline, highlight, glow | Planned |
-| Curved text | Planned |
-| Mockups (original or properly licensed artwork) | Planned |
+| Crop (zoom and focus), flip, image resize | Done |
+| Brightness, contrast, saturation, filter presets | Done |
+| Image transparency, shape masks, frames, photo grids | Done |
+| Text effects: shadow, outline, highlight | Done |
+| Glow effect | Planned |
+| Curved text | Done |
+| Mockups (original artwork: phone, laptop, browser window, instant photo) | Done |
 | Element animations | Planned |
 | Video clips, trimming, timeline, transitions; audio with volume | Future |
 | Video export (MP4/WebM), GIF export | Future |
 | HEIC import (needs an extra decoder) | Future |
 
 ### Phase 4: Optional AI (Optional online, some Offline)
+
+Stock photos from Unsplash and Pexels (your own free key, credits kept) are Done (online).
 
 AI is never required. Each AI feature is separate and can be turned on or off
 on its own. Provider options will be researched before each feature is built:
@@ -81,12 +86,12 @@ with your own key and your explicit consent.
 
 | Feature | Likely approach | Status |
 | --- | --- | --- |
-| AI settings: provider, model, API key, test connection, per-feature switches | Keys stored with Windows credential protection, never in project files or logs | Planned |
+| AI settings: providers, models, API key, test connection, consent, activity log | Keys encrypted with Windows (safeStorage), never in project files or logs | Done |
 | Background removal | Optional online via remove.bg (your own key, consent first). Local offline remover planned (remove.bg standalone API ends 1 Dec 2026) | Done (online) |
-| Writing help: generate, rewrite, summarise, proofread, translate | Local model or optional API | Planned |
-| Text-to-image generation | Local model (needs a capable GPU) or optional API | Planned |
-| Layout, palette and font suggestions; prompt-to-design | Optional API; local where feasible | Future |
-| Object removal, image expansion, edit by instruction | Optional API; local where feasible | Future |
+| Writing help: write, rewrite in a tone, translate, headlines | Local model or optional API | Done |
+| Text-to-image generation | Optional API with an image model (OpenAI-compatible) | Done (online) |
+| Prompt-to-design and layout edits by instruction, validated before use | Local model or optional API | Done |
+| Magic eraser, upscaling, image expansion | Optional API; local where feasible | Planned |
 | Speech transcription and captions | Local model | Future |
 | Video and audio generation | Optional API | Future |
 
@@ -94,7 +99,7 @@ with your own key and your explicit consent.
 
 | Feature | Category | Status |
 | --- | --- | --- |
-| Brand kit: logos, colours, fonts, reusable styles | Offline | Planned |
+| Brand kit: logos, colours, fonts | Offline | Done |
 | Folders, tags and search for designs | Offline | Planned |
 | Bulk create designs from CSV/XLSX data | Offline | Planned |
 | Import CSV/XLSX and place data in designs | Offline | Planned |
@@ -110,12 +115,12 @@ releases are single-user and local only.
 
 | Feature | Status |
 | --- | --- |
-| Windows installer (.exe), file association for `.odesign` | Planned |
+| Windows installer (.exe, per-user), file association for `.odesign`, built by CI | Done (built by CI; not code-signed) |
 | Offline test pass (no network at all) | Planned |
 | Performance and memory checks with large designs and images | Planned |
-| Project integrity and recovery tests | In progress (unit tests for the file format) |
-| Security review of credentials and dependencies | Planned |
-| User guide and list of known limitations | Planned |
+| Project integrity and recovery tests | Done (unit tests plus end-to-end save, reopen and crash recovery) |
+| Security review of credentials and dependencies | In progress (keys checked absent from files and exports in tests) |
+| User guide and list of known limitations | Done (README) |
 
 ## Rules the project follows
 

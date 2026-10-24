@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   FileImage,
   FileText,
@@ -17,11 +17,12 @@ import {
 } from 'lucide-react'
 import type { RecentFile, RecoveryItem, TemplateItem } from '@shared/ipc'
 import { canvasPresets } from '@shared/presets'
-import { Empty, Menu, NumberField, SearchInput } from './components/ui'
+import { Empty, LoadMore, Menu, NumberField, SearchInput } from './components/ui'
 import { showError } from './components/toast'
 import { openAsNewDesign, openDesignDialog, openDesignPath, openRecovered, openUserTemplate } from './io/projectIo'
 import { builtInTemplates, searchTemplates, templateCategories, templateDocument, type BuiltInTemplate, type TemplateCategory } from './library/templates'
-import { useTemplateThumb } from './library/templateThumbs'
+import { useNearView, usePaged, useTemplateThumb } from './library/templateThumbs'
+import { loadFonts } from './fonts/fontList'
 import { BrandMark } from './shell/BrandMark'
 import { timeAgo } from './panels/ProjectsPanel'
 import { bumpLibrary, useLibraryVersion } from './store/libraryStore'
@@ -42,14 +43,19 @@ const quick = [
 ]
 
 function TemplateCard({ template }: { template: BuiltInTemplate }) {
-  const url = useTemplateThumb(template, 320)
+  const ref = useRef<HTMLButtonElement>(null)
+  const url = useTemplateThumb(template, 320, useNearView(ref))
+  const open = async () => {
+    await loadFonts()
+    await openAsNewDesign(templateDocument(template))
+  }
   return (
-    <button className="design-card" onClick={() => void openAsNewDesign(templateDocument(template))} title={`Start from “${template.title}”`}>
+    <button ref={ref} className="design-card" onClick={() => void open()} title={`Start from “${template.title}”`}>
       <span className="thumb">{url ? <img src={url} alt="" /> : <span className="skeleton" style={{ width: '70%', height: '70%' }} />}</span>
       <span className="title">{template.title}</span>
       <span className="meta">
         {template.width} × {template.height}
-        {template.pages().length > 1 ? ` · ${template.pages().length} pages` : ''}
+        {(template.pageCount ?? 1) > 1 ? ` · ${template.pageCount} pages` : ''}
       </span>
     </button>
   )
@@ -77,6 +83,8 @@ export function HomeScreen({ onCreate }: { onCreate: (width: number, height: num
   }, [version])
 
   const templates = useMemo(() => searchTemplates(query, category), [query, category])
+  const listed = useMemo(() => (view === 'home' && !query ? templates.slice(0, 8) : templates), [view, query, templates])
+  const paged = usePaged(listed, 48)
   const validCustom = custom.width >= 1 && custom.height >= 1 && custom.width <= MAX_SIDE && custom.height <= MAX_SIDE
   const presetById = (id: string) => canvasPresets.find((p) => p.id === id)!
 
@@ -157,11 +165,12 @@ export function HomeScreen({ onCreate }: { onCreate: (width: number, height: num
         </Empty>
       ) : (
         <div className="card-grid">
-          {(view === 'home' && !query ? templates.slice(0, 8) : templates).map((t) => (
+          {paged.shown.map((t) => (
             <TemplateCard key={t.id} template={t} />
           ))}
         </div>
       )}
+      <LoadMore remaining={paged.more} onMore={paged.showMore} label="Show more templates" />
       {view === 'templates' && mine.length > 0 && (
         <>
           <div className="home-section-head" style={{ marginTop: 24 }}>

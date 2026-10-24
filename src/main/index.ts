@@ -94,7 +94,9 @@ function createWindow(): void {
   if (isDev) {
     window.loadURL(process.env['ELECTRON_RENDERER_URL']!)
   } else {
-    window.loadFile(join(__dirname, '../renderer/index.html'))
+    // The template checks in the test scripts need a switch; packaged builds never pass it.
+    const qa = !app.isPackaged && process.env['DS_TEMPLATE_QA'] === '1'
+    window.loadFile(join(__dirname, '../renderer/index.html'), qa ? { search: 'template-qa=1' } : undefined)
   }
 }
 

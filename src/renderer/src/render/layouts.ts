@@ -268,6 +268,15 @@ export function wrapText(text: string, maxWidth: number, size: number, font: str
   return lines
 }
 
+/** True when every word in the table fits its column without being split. */
+export function tableWordsFit(el: TableElement, measure: Measure = measureText): boolean {
+  const cols = Math.max(...el.rows.map((r) => r.length))
+  const room = el.width / cols - el.fontSize * 1.1
+  return el.rows.every((row, ri) =>
+    row.every((cell) => cell.split(/\s+/).every((word) => !word || measure(word, el.fontSize, el.fontFamily, el.headerRow && ri === 0) <= room))
+  )
+}
+
 export function tableLayout(el: TableElement, measure: Measure = measureText): { prims: Prim[]; height: number } {
   const cols = Math.max(...el.rows.map((r) => r.length))
   const colWidth = el.width / cols

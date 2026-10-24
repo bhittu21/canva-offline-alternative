@@ -1,5 +1,6 @@
 import type { DesignDocument, Page } from '@shared/model'
 import { SCHEMA_VERSION } from '@shared/model'
+import { generatedTemplates } from './gen/catalog'
 import { chart, ellipse, frame, group, icon, line, linear, page, path, radial, rect, table, text } from './templateKit'
 
 /**
@@ -17,9 +18,11 @@ export interface BuiltInTemplate {
   width: number
   height: number
   pages: () => Page[]
+  /** Number of pages, when known without building them. */
+  pageCount?: number
 }
 
-export type TemplateCategory = 'social' | 'stories' | 'presentations' | 'video' | 'print' | 'business' | 'documents'
+export type TemplateCategory = 'social' | 'stories' | 'presentations' | 'video' | 'print' | 'cards' | 'business' | 'documents' | 'planners' | 'education'
 
 export const templateCategories: { id: TemplateCategory; label: string }[] = [
   { id: 'social', label: 'Social posts' },
@@ -27,8 +30,11 @@ export const templateCategories: { id: TemplateCategory; label: string }[] = [
   { id: 'presentations', label: 'Presentations' },
   { id: 'video', label: 'Thumbnails and banners' },
   { id: 'print', label: 'Flyers and posters' },
+  { id: 'cards', label: 'Invitations and cards' },
   { id: 'business', label: 'Business' },
-  { id: 'documents', label: 'Documents' }
+  { id: 'documents', label: 'Documents' },
+  { id: 'planners', label: 'Planners and calendars' },
+  { id: 'education', label: 'Education' }
 ]
 
 const INK = '#1f2329'
@@ -36,7 +42,7 @@ const BLOB = 'M51 3C71 1 93 15 97 37C101 59 89 79 68 91C47 103 20 96 8 77C-3 59 
 const WAVE = 'M0 30C25 8 50 8 75 30S125 52 150 30S200 8 200 8V60H0Z'
 const SPARKLE = 'M50 0C54 34 66 46 100 50C66 54 54 66 50 100C46 66 34 54 0 50C34 46 46 34 50 0Z'
 
-export const builtInTemplates: BuiltInTemplate[] = [
+const handmadeTemplates: BuiltInTemplate[] = [
   // ------------------------------------------------------------ Social posts (1080 x 1080)
   {
     id: 'sale-bold',
@@ -49,8 +55,8 @@ export const builtInTemplates: BuiltInTemplate[] = [
       page('#fff4e8', [
         ellipse(620, -180, 640, 640, '#ffb37a', { name: 'Sun' }),
         path(BLOB, [100, 100], -160, 640, 560, 560, '#ffd166', { name: 'Blob' }),
-        text('SUMMER', 90, 250, 900, 92, { fontFamily: 'Montserrat', fontStyle: 'bold', letterSpacing: 18, fill: INK }),
-        text('SALE', 70, 340, 940, 330, { fontFamily: 'Anton', fill: '#ff5a36', lineHeight: 1 }),
+        text('SUMMER', 90, 250, 900, 70, { fontFamily: 'Montserrat', fontStyle: 'bold', letterSpacing: 18, fill: INK }),
+        text('SALE', 70, 340, 940, 330, { fontFamily: 'Anton', fill: '#d63a17', lineHeight: 1 }),
         rect(270, 720, 540, 104, INK, { cornerRadius: 52, name: 'Pill' }),
         text('UP TO 50% OFF', 270, 750, 540, 44, { fontFamily: 'Montserrat', fontStyle: 'bold', fill: '#ffffff', align: 'center', letterSpacing: 4 }),
         text('This weekend only · yourshop.com', 90, 900, 900, 34, { fontFamily: 'Inter', fill: '#5b4636', align: 'center' })
@@ -67,7 +73,7 @@ export const builtInTemplates: BuiltInTemplate[] = [
     pages: () => [
       page('#f7f4ee', [
         rect(60, 60, 960, 960, 'transparent', { stroke: '#1f2329', strokeWidth: 3, name: 'Border' }),
-        text('“', 90, 170, 900, 260, { fontFamily: 'DM Serif Display', fill: '#c8a27a', align: 'center', lineHeight: 0.8 }),
+        text('“', 90, 170, 900, 260, { fontFamily: 'DM Serif Display', fill: '#9a6b3f', align: 'center', lineHeight: 0.8 }),
         text('Do the work.\nTrust the process.', 120, 400, 840, 96, { fontFamily: 'DM Serif Display', fill: INK, align: 'center', lineHeight: 1.12 }),
         line(440, 700, 200, '#c8a27a', 4),
         text('YOUR NAME', 120, 740, 840, 30, { fontFamily: 'Josefin Sans', fontStyle: 'bold', letterSpacing: 8, fill: '#6b5d52', align: 'center' })
@@ -83,12 +89,12 @@ export const builtInTemplates: BuiltInTemplate[] = [
     height: 1080,
     pages: () => [
       page('#ffffff', [
-        rect(0, 0, 1080, 1080, '#ffffff', { gradient: linear(140, '#7c5cff', '#22a6c8'), name: 'Background' }),
+        rect(0, 0, 1080, 1080, '#ffffff', { gradient: linear(140, '#5b3fd9', '#14708a'), name: 'Background' }),
         frame(120, 120, 840, 560, { mask: 'rounded', cornerRadius: 48, name: 'Product photo' }),
         rect(120, 640, 220, 70, '#ffd166', { cornerRadius: 35, name: 'Badge' }),
         text('NEW', 120, 656, 220, 34, { fontFamily: 'Archivo Black', fill: INK, align: 'center', letterSpacing: 4 }),
-        text('Meet the all-new Aurora', 120, 760, 840, 72, { fontFamily: 'Poppins', fontStyle: 'bold', fill: '#ffffff' }),
-        text('Lighter, faster and made to last. Available today.', 120, 860, 840, 36, { fontFamily: 'Inter', fill: '#eef0ff' })
+        text('Meet the all-new Aurora', 120, 740, 840, 72, { fontFamily: 'Poppins', fontStyle: 'bold', fill: '#ffffff' }),
+        text('Lighter, faster and made to last. Available today.', 120, 930, 840, 36, { fontFamily: 'Inter', fill: '#ffffff' })
       ])
     ]
   },
@@ -105,13 +111,13 @@ export const builtInTemplates: BuiltInTemplate[] = [
           text(n, 90, 110, 300, 200, { fontFamily: 'Space Grotesk', fontStyle: 'bold', fill: '#12a37f' }),
           text(title, 90, 380, 900, 84, { fontFamily: 'Space Grotesk', fontStyle: 'bold', fill: '#0f2e24', lineHeight: 1.1 }),
           text(body, 90, 620, 820, 40, { fontFamily: 'Inter', fill: '#2f4f45', lineHeight: 1.45 }),
-          text('swipe →', 760, 960, 230, 32, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#12a37f', align: 'right' })
+          text('swipe →', 760, 960, 230, 32, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#0b7a5e', align: 'right' })
         ])
       return [
-        page('#12a37f', [
+        page('#0b7a5e', [
           path(SPARKLE, [100, 100], 820, 110, 150, 150, '#d9fbe9', { name: 'Sparkle' }),
           text('5 habits for a calmer week', 90, 330, 900, 120, { fontFamily: 'Space Grotesk', fontStyle: 'bold', fill: '#ffffff', lineHeight: 1.05 }),
-          text('A quick guide · swipe →', 90, 820, 900, 40, { fontFamily: 'Inter', fill: '#d9fbe9' })
+          text('A quick guide · swipe →', 90, 820, 900, 40, { fontFamily: 'Inter', fill: '#ffffff' })
         ]),
         slide('01', 'Plan tomorrow tonight', 'Write down three things that matter most. Starting the day with a plan beats starting with your inbox.'),
         slide('02', 'Batch the small stuff', 'Group emails, calls and errands into one block, so they stop interrupting your focus time.')
@@ -166,9 +172,10 @@ export const builtInTemplates: BuiltInTemplate[] = [
     pages: () => [
       page('#0f172a', [
         frame(0, 0, 1080, 1920, { name: 'Background photo' }),
-        rect(0, 1100, 1080, 820, '#000000', { gradient: linear(90, '#0f172a00', '#0f172ae6'), name: 'Shade' }),
+        rect(0, 1000, 1080, 260, '#000000', { gradient: linear(90, '#0f172a00', '#0f172ad9'), name: 'Shade fade' }),
+        rect(0, 1250, 1080, 670, '#0f172a', { opacity: 0.85, name: 'Shade' }),
         text('weekend in', 90, 1300, 900, 80, { fontFamily: 'Dancing Script', fontStyle: 'bold', fill: '#ffd166' }),
-        text('LISBON', 80, 1390, 920, 260, { fontFamily: 'Anton', fill: '#ffffff', lineHeight: 1 }),
+        text('LISBON', 80, 1410, 920, 250, { fontFamily: 'Anton', fill: '#ffffff', lineHeight: 1 }),
         icon('map-pin', 90, 1720, 56, '#ffffff'),
         text('Tap for my top 10 spots', 170, 1726, 800, 40, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#ffffff' })
       ])
@@ -183,7 +190,7 @@ export const builtInTemplates: BuiltInTemplate[] = [
     height: 1920,
     pages: () => [
       page('#ffd166', [
-        text('THIS OR THAT?', 80, 180, 920, 120, { fontFamily: 'Archivo Black', fill: INK, align: 'center' }),
+        text('THIS OR THAT?', 80, 180, 920, 84, { fontFamily: 'Archivo Black', fill: INK, align: 'center' }),
         frame(90, 420, 420, 620, { mask: 'rounded', cornerRadius: 40, name: 'Option A' }),
         frame(570, 420, 420, 620, { mask: 'rounded', cornerRadius: 40, name: 'Option B' }),
         text('Coffee', 90, 1080, 420, 64, { fontFamily: 'Poppins', fontStyle: 'bold', fill: INK, align: 'center' }),
@@ -205,13 +212,13 @@ export const builtInTemplates: BuiltInTemplate[] = [
     height: 1080,
     pages: () => {
       const header = (title: string, n: string) => [
-        text(n, 140, 110, 200, 30, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#7c5cff', letterSpacing: 4 }),
+        text(n, 140, 110, 200, 30, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#6440f0', letterSpacing: 4 }),
         text(title, 140, 160, 1640, 76, { fontFamily: 'Poppins', fontStyle: 'bold', fill: INK })
       ]
       return [
         page('#0f0b1f', [
           rect(0, 0, 1920, 1080, '#0f0b1f', { gradient: linear(135, '#0f0b1f', '#2b1d6b'), name: 'Background' }),
-          ellipse(1300, -260, 900, 900, '#7c5cff', { opacity: 0.35, name: 'Glow' }),
+          ellipse(1300, -260, 900, 900, '#6440f0', { opacity: 0.35, name: 'Glow' }),
           text('NORTHWIND', 140, 300, 1200, 40, { fontFamily: 'Space Grotesk', fontStyle: 'bold', fill: '#b9a6ff', letterSpacing: 12 }),
           text('Smarter planning for small teams', 140, 380, 1200, 110, { fontFamily: 'Poppins', fontStyle: 'bold', fill: '#ffffff', lineHeight: 1.08 }),
           text('Investor presentation · 2026', 140, 760, 1200, 38, { fontFamily: 'Inter', fill: '#c9c2ec' })
@@ -224,20 +231,20 @@ export const builtInTemplates: BuiltInTemplate[] = [
             ['trending-down', 'Missed deadlines', '4 in 10 projects finish late because plans go stale.']
           ].flatMap(([ic, t, b], i) => [
             rect(140 + i * 560, 420, 500, 460, '#f5f3ff', { cornerRadius: 28, name: 'Card' }),
-            icon(ic, 200 + i * 560, 480, 80, '#7c5cff'),
+            icon(ic, 200 + i * 560, 480, 80, '#6440f0'),
             text(t, 200 + i * 560, 610, 400, 40, { fontFamily: 'Poppins', fontStyle: 'bold', fill: INK }),
-            text(b, 200 + i * 560, 680, 400, 28, { fontFamily: 'Inter', fill: '#4a5061', lineHeight: 1.45 })
+            text(b, 200 + i * 560, 730, 400, 28, { fontFamily: 'Inter', fill: '#4a5061', lineHeight: 1.45 })
           ])
         ]),
         page('#ffffff', [
           ...header('Traction', '02'),
           chart('column', 140, 360, 1040, 600, {
             labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-            series: [{ name: 'Active teams', color: '#7c5cff', values: [120, 340, 760, 1480] }],
+            series: [{ name: 'Active teams', color: '#6440f0', values: [120, 340, 760, 1480] }],
             showLegend: false,
             showValues: true
           }),
-          text('12×', 1300, 420, 480, 160, { fontFamily: 'Space Grotesk', fontStyle: 'bold', fill: '#7c5cff' }),
+          text('12×', 1300, 420, 480, 160, { fontFamily: 'Space Grotesk', fontStyle: 'bold', fill: '#6440f0' }),
           text('growth in active teams this year, with 94% monthly retention.', 1300, 640, 480, 36, { fontFamily: 'Inter', fill: '#4a5061', lineHeight: 1.4 })
         ]),
         page('#ffffff', [
@@ -253,10 +260,10 @@ export const builtInTemplates: BuiltInTemplate[] = [
             140,
             380,
             1640,
-            { fontSize: 34, headerFill: '#7c5cff', stripeFill: '#f5f3ff', borderColor: '#e2dcff', align: 'center', fontFamily: 'Inter' }
+            { fontSize: 34, headerFill: '#6440f0', stripeFill: '#f5f3ff', borderColor: '#e2dcff', align: 'center', fontFamily: 'Inter' }
           )
         ]),
-        page('#7c5cff', [
+        page('#6440f0', [
           text('Thank you', 140, 380, 1640, 150, { fontFamily: 'Poppins', fontStyle: 'bold', fill: '#ffffff', align: 'center' }),
           text('hello@northwind.example · northwind.example', 140, 600, 1640, 40, { fontFamily: 'Inter', fill: '#ebe5ff', align: 'center' })
         ])
@@ -282,7 +289,7 @@ export const builtInTemplates: BuiltInTemplate[] = [
         ...['How water evaporates', 'Why clouds form', 'Where rain goes next'].flatMap((t, i) => [
           ellipse(140, 330 + i * 190, 90, 90, '#ffd166', { name: 'Bullet' }),
           text(String(i + 1), 140, 348 + i * 190, 90, 44, { fontFamily: 'Nunito', fontStyle: 'bold', fill: '#3a2a00', align: 'center' }),
-          text(t, 280, 348 + i * 190, 1200, 48, { fontFamily: 'Nunito', fill: '#3a2a00' })
+          text(t, 280, 348 + i * 190, 920, 48, { fontFamily: 'Nunito', fill: '#3a2a00' })
         ]),
         frame(1260, 300, 520, 600, { mask: 'rounded', cornerRadius: 36, name: 'Picture' })
       ]),
@@ -366,8 +373,8 @@ export const builtInTemplates: BuiltInTemplate[] = [
         ellipse(170, 230, 900, 900, '#ffd166', { name: 'Sun' }),
         ...Array.from({ length: 6 }, (_, i) => rect(0, 760 + i * 70, 1240, 34, '#ff5a36', { name: 'Stripe' })),
         text('SUNSET', 60, 1180, 1120, 230, { fontFamily: 'Anton', fill: '#1f1300', align: 'center', lineHeight: 1 }),
-        text('SESSIONS', 60, 1400, 1120, 110, { fontFamily: 'Anton', fill: '#ffffff', align: 'center', letterSpacing: 24 }),
-        text('LIVE MUSIC · 21 AUGUST · CITY PARK', 60, 1600, 1120, 38, { fontFamily: 'Montserrat', fontStyle: 'bold', fill: '#1f1300', align: 'center', letterSpacing: 4 })
+        text('SESSIONS', 60, 1440, 1120, 110, { fontFamily: 'Anton', fill: '#ffffff', align: 'center', letterSpacing: 24 }),
+        text('LIVE MUSIC · 21 AUGUST · CITY PARK', 60, 1620, 1120, 38, { fontFamily: 'Montserrat', fontStyle: 'bold', fill: '#1f1300', align: 'center', letterSpacing: 4 })
       ])
     ]
   },
@@ -401,7 +408,7 @@ export const builtInTemplates: BuiltInTemplate[] = [
           series: [{ name: 'Minutes per day', color: '#0f172a', values: [24, 31, 42, 55] }],
           showValues: true
         }),
-        text('Source: example data for illustration', 90, 1630, 1060, 24, { fontFamily: 'Inter', fill: '#8a90a0' })
+        text('Source: example data for illustration', 90, 1630, 1060, 24, { fontFamily: 'Inter', fill: '#5f6577' })
       ])
     ]
   },
@@ -416,19 +423,19 @@ export const builtInTemplates: BuiltInTemplate[] = [
     height: 600,
     pages: () => [
       page('#1f2329', [
-        ellipse(-160, 360, 420, 420, '#7c5cff', { name: 'Circle' }),
+        ellipse(-160, 360, 420, 420, '#6440f0', { name: 'Circle' }),
         text('Alex Morgan', 80, 200, 900, 70, { fontFamily: 'Poppins', fontStyle: 'bold', fill: '#ffffff' }),
         text('PRODUCT DESIGNER', 80, 290, 900, 26, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#b9a6ff', letterSpacing: 6 })
       ]),
       page('#ffffff', [
-        rect(0, 0, 18, 600, '#7c5cff', { name: 'Accent bar' }),
+        rect(0, 0, 18, 600, '#6440f0', { name: 'Accent bar' }),
         ...[
           ['phone', '+1 555 0100'],
           ['mail', 'alex@example.com'],
           ['globe', 'alexmorgan.example'],
           ['map-pin', 'Portland, Oregon']
         ].flatMap(([ic, t], i) =>
-          group([icon(ic, 100, 130 + i * 90, 40, '#7c5cff'), text(t, 170, 134 + i * 90, 760, 30, { fontFamily: 'Inter', fill: INK })])
+          group([icon(ic, 100, 130 + i * 90, 40, '#6440f0'), text(t, 170, 134 + i * 90, 760, 30, { fontFamily: 'Inter', fill: INK })])
         )
       ])
     ]
@@ -500,24 +507,24 @@ export const builtInTemplates: BuiltInTemplate[] = [
       page('#ffffff', [
         rect(0, 0, 420, 1754, '#f3f0ff', { name: 'Sidebar' }),
         frame(90, 100, 240, 240, { mask: 'circle', name: 'Profile photo' }),
-        text('CONTACT', 90, 420, 260, 24, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#7c5cff', letterSpacing: 4 }),
+        text('CONTACT', 90, 420, 260, 24, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#6440f0', letterSpacing: 4 }),
         text('sam@example.com\n+1 555 0142\nsamrivera.example\nAustin, Texas', 90, 470, 290, 24, { fontFamily: 'Inter', fill: '#3a3f4b', lineHeight: 1.7 }),
-        text('SKILLS', 90, 720, 260, 24, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#7c5cff', letterSpacing: 4 }),
+        text('SKILLS', 90, 720, 260, 24, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#6440f0', letterSpacing: 4 }),
         text('Brand design\nTypography\nMotion graphics\nIllustration\nWorkshop facilitation', 90, 770, 290, 24, { fontFamily: 'Inter', fill: '#3a3f4b', lineHeight: 1.7 }),
         text('Sam Rivera', 500, 110, 650, 80, { fontFamily: 'Poppins', fontStyle: 'bold', fill: INK }),
-        text('Graphic designer', 500, 210, 650, 34, { fontFamily: 'Inter', fill: '#7c5cff' }),
+        text('Graphic designer', 500, 210, 650, 34, { fontFamily: 'Inter', fill: '#6440f0' }),
         text('Designer with eight years of experience creating brands, campaigns and packaging for independent businesses.', 500, 290, 650, 26, { fontFamily: 'Inter', fill: '#4a5061', lineHeight: 1.55 }),
-        text('EXPERIENCE', 500, 470, 650, 24, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#7c5cff', letterSpacing: 4 }),
+        text('EXPERIENCE', 500, 470, 650, 24, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#6440f0', letterSpacing: 4 }),
         ...[
           ['Senior Designer · Bright Studio', '2021 – now', 'Led rebrands for 20+ clients and mentored a team of four.'],
           ['Designer · Northwind Agency', '2018 – 2021', 'Designed campaigns across print, social and web.'],
           ['Junior Designer · Paper & Co.', '2016 – 2018', 'Packaging and in-store graphics for a stationery brand.']
         ].flatMap(([role, when, what], i) => [
           text(role, 500, 520 + i * 200, 650, 30, { fontFamily: 'Poppins', fontStyle: 'bold', fill: INK }),
-          text(when, 500, 562 + i * 200, 650, 22, { fontFamily: 'Inter', fill: '#8a90a0' }),
+          text(when, 500, 562 + i * 200, 650, 22, { fontFamily: 'Inter', fill: '#5f6577' }),
           text(what, 500, 600 + i * 200, 650, 24, { fontFamily: 'Inter', fill: '#4a5061', lineHeight: 1.5 })
         ]),
-        text('EDUCATION', 500, 1150, 650, 24, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#7c5cff', letterSpacing: 4 }),
+        text('EDUCATION', 500, 1150, 650, 24, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#6440f0', letterSpacing: 4 }),
         text('BA Graphic Design · State University · 2016', 500, 1200, 650, 26, { fontFamily: 'Inter', fill: '#3a3f4b' })
       ])
     ]
@@ -531,14 +538,14 @@ export const builtInTemplates: BuiltInTemplate[] = [
     height: 1754,
     pages: () => [
       page('#fffdf8', [
-        text('This week', 90, 90, 700, 96, { fontFamily: 'Caveat', fontStyle: 'bold', fill: INK }),
-        text('Week of ____________', 760, 130, 390, 30, { fontFamily: 'Inter', fill: '#8a90a0', align: 'right' }),
+        text('This week', 90, 90, 620, 96, { fontFamily: 'Caveat', fontStyle: 'bold', fill: INK }),
+        text('Week of ____________', 760, 130, 390, 30, { fontFamily: 'Inter', fill: '#5f6577', align: 'right' }),
         ...['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Weekend'].flatMap((day, i) => {
           const x = 90 + (i % 2) * 545
           const y = 260 + Math.floor(i / 2) * 400
           return [
             rect(x, y, 515, 370, '#ffffff', { stroke: '#e3e5ea', strokeWidth: 2, cornerRadius: 20, name: 'Box' }),
-            text(day.toUpperCase(), x + 30, y + 26, 455, 24, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#ff6b6b', letterSpacing: 4 }),
+            text(day.toUpperCase(), x + 30, y + 26, 455, 24, { fontFamily: 'Inter', fontStyle: 'bold', fill: '#d93a3a', letterSpacing: 4 }),
             ...[0, 1, 2, 3, 4].map((r) => line(x + 30, y + 110 + r * 54, 455, '#eceef2', 2))
           ]
         }),
@@ -568,6 +575,9 @@ export const builtInTemplates: BuiltInTemplate[] = [
     ]
   }
 ]
+
+/** Every built-in template: the hand-made ones first, then the generated library. */
+export const builtInTemplates: BuiltInTemplate[] = [...handmadeTemplates.map((t) => ({ ...t, pageCount: t.pageCount ?? t.pages().length })), ...generatedTemplates()]
 
 /** A complete document for a built-in template, ready to open or to copy pages from. */
 export function templateDocument(t: BuiltInTemplate): DesignDocument {

@@ -349,3 +349,21 @@ export function SectionHead({ title, action }: { title: ReactNode; action?: Reac
     </div>
   )
 }
+
+/** "Show more" for long lists; it also loads the next page by itself when scrolled into view. */
+export function LoadMore({ remaining, onMore, label = 'Show more' }: { remaining: number; onMore: () => void; label?: string }) {
+  const ref = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || remaining <= 0 || typeof IntersectionObserver === 'undefined') return
+    const io = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && onMore(), { rootMargin: '400px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [remaining, onMore])
+  if (remaining <= 0) return null
+  return (
+    <button ref={ref} className="btn sm ghost load-more" onClick={onMore}>
+      {label} ({remaining} more)
+    </button>
+  )
+}

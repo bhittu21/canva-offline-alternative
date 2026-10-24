@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FileDown, LayoutTemplate, Save, Trash2 } from 'lucide-react'
 import type { TemplateItem } from '@shared/ipc'
 import type { DesignDocument } from '@shared/model'
-import { Empty, SearchInput, SectionHead } from '@renderer/components/ui'
+import { Empty, LoadMore, SearchInput, SectionHead } from '@renderer/components/ui'
 import { showError, showToast } from '@renderer/components/toast'
 import { addTemplatePages, loadUserTemplate } from '@renderer/io/projectIo'
 import { builtInTemplates, searchTemplates, templateCategories, templateDocument, type BuiltInTemplate, type TemplateCategory } from '@renderer/library/templates'
-import { useTemplateThumb } from '@renderer/library/templateThumbs'
+import { useNearView, usePaged, useTemplateThumb } from '@renderer/library/templateThumbs'
+import { loadFonts } from '@renderer/fonts/fontList'
 import { editorStore, selectActivePage } from '@renderer/store/editorStore'
 import { bumpLibrary, useLibraryVersion } from '@renderer/store/libraryStore'
 import { confirmAction, openDialog, uiStore, updatePrefs, usePrefs } from '@renderer/store/uiStore'
@@ -43,16 +44,21 @@ export async function applyTemplate(template: DesignDocument, key: string): Prom
 }
 
 function BuiltInCard({ template }: { template: BuiltInTemplate }) {
-  const url = useTemplateThumb(template)
+  const ref = useRef<HTMLButtonElement>(null)
+  const url = useTemplateThumb(template, 240, useNearView(ref))
+  const use = async () => {
+    await loadFonts()
+    await applyTemplate(templateDocument(template), `builtin:${template.id}`)
+  }
   return (
-    <button className="thumb-card" title={template.title} onClick={() => void applyTemplate(templateDocument(template), `builtin:${template.id}`)}>
+    <button ref={ref} className="thumb-card" title={template.title} onClick={() => void use()}>
       <span className="thumb" style={{ aspectRatio: template.width / template.height > 1.2 ? '16 / 10' : '1' }}>
         {url ? <img src={url} alt="" /> : <span className="skeleton" style={{ width: '80%', height: '80%' }} />}
       </span>
       <span className="thumb-title">{template.title}</span>
       <span className="thumb-meta">
         {template.width} × {template.height}
-        {template.pages().length > 1 ? ` · ${template.pages().length} pages` : ''}
+        {(template.pageCount ?? 1) > 1 ? ` · ${template.pageCount} pages` : ''}
       </span>
     </button>
   )
@@ -71,6 +77,7 @@ export function DesignPanel(_props: { doc: DesignDocument }) {
   }, [version])
 
   const results = useMemo(() => (category === 'mine' ? [] : searchTemplates(query, category)), [query, category])
+  const paged = usePaged(results, 40)
   const mineShown = mine.filter((t) => !query || t.title.toLowerCase().includes(query.toLowerCase()))
   const recent = (prefs?.recentTemplates ?? [])
     .map((k) => (k.startsWith('builtin:') ? builtInTemplates.find((t) => `builtin:${t.id}` === k) : undefined))
@@ -179,11 +186,12 @@ export function DesignPanel(_props: { doc: DesignDocument }) {
             </Empty>
           ) : (
             <div className="tile-grid cols-2">
-              {results.map((t) => (
+              {paged.shown.map((t) => (
                 <BuiltInCard key={t.id} template={t} />
               ))}
             </div>
           )}
+          <LoadMore remaining={paged.more} onMore={paged.showMore} />
         </section>
       )}
       <p className="muted small" style={{ marginTop: 14 }}>

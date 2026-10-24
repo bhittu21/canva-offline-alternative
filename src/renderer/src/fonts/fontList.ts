@@ -51,8 +51,15 @@ export function fontInfo(family: string): FontInfo | undefined {
   return fonts.find((f) => f.family === family)
 }
 
-/** Loads every bundled font face so the canvas measures and draws text with the right font from the start. */
-export async function loadFonts(): Promise<void> {
+let loading: Promise<void> | null = null
+
+/** Loads every bundled font face so the canvas measures and draws text with the right font from the start. Runs once. */
+export function loadFonts(): Promise<void> {
+  loading ??= loadAll()
+  return loading
+}
+
+async function loadAll(): Promise<void> {
   const faces = bundled.flatMap((f) => [
     `400 16px "${f.family}"`,
     ...(f.bold ? [`700 16px "${f.family}"`] : []),

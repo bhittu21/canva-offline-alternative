@@ -171,6 +171,7 @@ function GeneralTab() {
       <section className="settings-section">
         <Heading title="Appearance" />
         <Segmented
+          block
           value={prefs.theme}
           label="Theme"
           onChange={(theme) => void updatePrefs({ theme })}
@@ -231,7 +232,7 @@ function PhotosTab() {
   }, [])
   return (
     <>
-      <p className="muted small" style={{ marginTop: 0 }}>
+      <p className="settings-intro">
         Optional. Stock photo search sends only your search words to the provider. Thumbnails load from the provider’s servers, and the photo you choose is downloaded into your design with the
         photographer’s credit. Uploading your own images always works without a key.
       </p>
@@ -311,7 +312,7 @@ function AiTab() {
 
   return (
     <>
-      <p className="muted small" style={{ marginTop: 0 }}>
+      <p className="settings-intro">
         AI Studio works with a model on this PC (free, private) or with your own key for an online service. Requests are made by the app’s background process, keys are encrypted with Windows, and
         online services are only contacted after you agree. Prompts and keys are never written to logs or design files.
       </p>
@@ -451,6 +452,11 @@ function ProviderCard({ provider: p, active, onChange }: { provider: AiProviderS
             configured={p.hasKey}
             placeholder={`Paste your ${p.label} API key`}
             test={async (key) => {
+              // Without a model yet, listing the models still proves the key works.
+              if (!p.model) {
+                const list = await window.api.ai.listModels(p.id, key)
+                return `Key works. ${list.length} model${list.length === 1 ? '' : 's'} available: choose one below.`
+              }
               const r = await window.api.ai.test(p.id, key)
               return `Connected to ${r.model}.`
             }}

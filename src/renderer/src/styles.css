@@ -1,24 +1,28 @@
 @import './fonts/fonts.css';
+@import '@fontsource-variable/manrope/wght.css';
+@import '@fontsource-variable/space-grotesk/wght.css';
 
 /* =====================================================================
    Design tokens
    ===================================================================== */
 
 :root {
-  --bg: #f4f5f7;
+  --bg: #f3f4f8;
   --surface: #ffffff;
-  --surface-2: #f8f9fb;
-  --surface-3: #eff1f4;
-  --surface-hover: #f1f2f5;
-  --border: #e3e5ea;
-  --border-strong: #cfd3db;
-  --text: #15171c;
-  --text-2: #4a5061;
-  --text-3: #8a90a0;
-  --accent: #6d4aff;
-  --accent-hover: #5c39f2;
-  --accent-soft: #f0ecff;
-  --accent-text: #5131e3;
+  --surface-2: #f7f8fb;
+  --surface-3: #eef0f5;
+  --surface-hover: #f2f3f8;
+  --border: #e4e6ee;
+  --border-strong: #cdd2de;
+  --text: #0f1220;
+  --text-2: #4b5168;
+  --text-3: #80869c;
+  --accent: #6b4dff;
+  --accent-hover: #5a3cf0;
+  --accent-soft: #f0edff;
+  --accent-text: #5232e0;
+  --accent-gradient: linear-gradient(135deg, #7b5cff 0%, #5d63ff 55%, #2fa8ff 100%);
+  --accent-glow: 0 6px 18px rgba(107, 77, 255, 0.28);
   --on-accent: #ffffff;
   --danger: #d1301f;
   --danger-soft: #fdeeec;
@@ -33,40 +37,51 @@
   --shadow: 0 2px 6px rgba(16, 24, 40, 0.06), 0 8px 20px rgba(16, 24, 40, 0.08);
   --shadow-lg: 0 12px 40px rgba(16, 24, 40, 0.18);
   --focus-ring: 0 0 0 3px rgba(109, 74, 255, 0.28);
-  --radius-sm: 6px;
-  --radius: 8px;
-  --radius-lg: 12px;
+  --radius-sm: 7px;
+  --radius: 9px;
+  --radius-lg: 14px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
   --topbar-h: 52px;
   --rail-w: 76px;
   --panel-w: 328px;
   --inspector-w: 292px;
   --bottombar-h: 44px;
-  --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  /* UI type: Manrope for text, Space Grotesk for titles and numbers. Both are bundled, so they work offline. */
+  --font: 'Manrope Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk Variable', 'Manrope Variable', 'Segoe UI', sans-serif;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 
   font-family: var(--font);
   font-size: 13.5px;
-  line-height: 1.4;
+  line-height: 1.5;
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
   color: var(--text);
   background: var(--bg);
   color-scheme: light;
 }
 
 :root[data-theme='dark'] {
-  --bg: #121318;
-  --surface: #1b1d24;
-  --surface-2: #20232b;
-  --surface-3: #282b35;
-  --surface-hover: #262933;
-  --border: #2e323d;
-  --border-strong: #3d4250;
-  --text: #eceef3;
-  --text-2: #b7bccb;
-  --text-3: #7d8496;
-  --accent: #8b6dff;
-  --accent-hover: #9c82ff;
-  --accent-soft: #2a2447;
-  --accent-text: #b9a6ff;
+  --bg: #0b0d14;
+  --surface: #12151e;
+  --surface-2: #161a25;
+  --surface-3: #1e2331;
+  --surface-hover: #1b2030;
+  --border: #242a3a;
+  --border-strong: #343c52;
+  --text: #eef0f7;
+  --text-2: #b4bacd;
+  --text-3: #7c839b;
+  --accent: #8c72ff;
+  --accent-hover: #9d87ff;
+  --accent-soft: #231e42;
+  --accent-text: #bcaaff;
+  --accent-glow: 0 6px 22px rgba(140, 114, 255, 0.35);
   --danger: #ff6b5b;
   --danger-soft: #3a1f1d;
   --success: #4fd1a1;
@@ -74,7 +89,7 @@
   --warning: #f2c46d;
   --warning-soft: #352a14;
   --info-soft: #1d2638;
-  --workspace: #0e0f13;
+  --workspace: #080a10;
   --page-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.45);
   --shadow: 0 2px 6px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
@@ -196,7 +211,7 @@ a {
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text);
-  font-weight: 550;
+  font-weight: 600;
   white-space: nowrap;
   transition:
     background 0.12s var(--ease),
@@ -219,14 +234,16 @@ a {
 }
 
 .btn.primary {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent-gradient);
+  border-color: transparent;
   color: var(--on-accent);
 }
 
 .btn.primary:hover:not(:disabled) {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
+  background: var(--accent-gradient);
+  border-color: transparent;
+  box-shadow: var(--accent-glow);
+  filter: brightness(1.06);
 }
 
 .btn.ghost {
@@ -431,13 +448,13 @@ a {
 .field {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
   min-width: 0;
 }
 
 .field-label {
-  font-size: 11.5px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 650;
   color: var(--text-2);
 }
 
@@ -470,7 +487,6 @@ input[type='number']::-webkit-inner-spin-button {
   border-radius: var(--radius);
   background: var(--surface-3);
   max-width: 100%;
-  overflow-x: auto;
 }
 
 .segmented button {
@@ -478,17 +494,18 @@ input[type='number']::-webkit-inner-spin-button {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
-  height: 28px;
-  padding: 0 10px;
+  min-height: 28px;
+  padding: 4px 12px;
+  line-height: 1.25;
+  text-align: center;
   border: none;
   border-radius: 6px;
   background: transparent;
   color: var(--text-2);
-  font-weight: 550;
+  font-weight: 600;
   font-size: 12.5px;
-  white-space: nowrap;
 }
 
 .segmented button:hover:not(.on) {
@@ -607,8 +624,8 @@ input[type='range']::-webkit-slider-thumb {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  height: 20px;
-  padding: 0 7px;
+  height: 22px;
+  padding: 0 9px;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 600;
@@ -651,7 +668,8 @@ input[type='range']::-webkit-slider-thumb {
 .notice {
   display: flex;
   gap: 10px;
-  padding: 10px 12px;
+  margin: 0;
+  padding: 11px 14px;
   border-radius: var(--radius);
   background: var(--warning-soft);
   color: var(--warning);
@@ -786,7 +804,8 @@ input[type='range']::-webkit-slider-thumb {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(14, 16, 22, 0.42);
+  background: rgba(10, 12, 20, 0.48);
+  backdrop-filter: blur(3px);
   z-index: 2000;
   animation: fade-in 0.15s;
 }
@@ -802,7 +821,8 @@ input[type='range']::-webkit-slider-thumb {
   flex-direction: column;
   width: min(520px, 100%);
   max-height: calc(100vh - 48px);
-  border-radius: 14px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
   background: var(--surface);
   box-shadow: var(--shadow-lg);
   animation: modal-in 0.18s var(--ease);
@@ -828,16 +848,16 @@ input[type='range']::-webkit-slider-thumb {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 16px 18px 12px;
+  padding: 18px 22px 14px;
 }
 
 .modal-header h2 {
-  font-size: 16px;
-  font-weight: 650;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .modal-body {
-  padding: 4px 18px 18px;
+  padding: 4px 22px 22px;
   overflow: auto;
 }
 
@@ -845,8 +865,8 @@ input[type='range']::-webkit-slider-thumb {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  padding: 12px 18px;
+  gap: 10px;
+  padding: 14px 22px;
   border-top: 1px solid var(--border);
 }
 
@@ -1138,7 +1158,7 @@ input[type='range']::-webkit-slider-thumb {
   justify-content: center;
   gap: 3px;
   width: 64px;
-  min-height: 54px;
+  min-height: 52px;
   padding: 6px 2px;
   border: none;
   border-radius: 10px;
@@ -1202,8 +1222,8 @@ input[type='range']::-webkit-slider-thumb {
 .panel-head {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 14px 14px 10px;
+  gap: 12px;
+  padding: 16px 16px 10px;
 }
 
 .panel-title {
@@ -1223,11 +1243,11 @@ input[type='range']::-webkit-slider-thumb {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 2px 14px 18px;
+  padding: 2px 16px 20px;
 }
 
 .panel-section {
-  margin-top: 14px;
+  margin-top: 18px;
 }
 
 .panel-section:first-child {
@@ -1737,9 +1757,9 @@ input[type='range']::-webkit-slider-thumb {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 14px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border);
-  min-height: 50px;
+  min-height: 52px;
 }
 
 .inspector-head h2 {
@@ -1768,7 +1788,7 @@ input[type='range']::-webkit-slider-thumb {
 }
 
 .insp-section {
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -1780,10 +1800,11 @@ input[type='range']::-webkit-slider-thumb {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 11.5px;
-  font-weight: 650;
-  letter-spacing: 0.03em;
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--text-3);
 }
@@ -2170,33 +2191,38 @@ input[type='range']::-webkit-slider-thumb {
 
 .settings {
   display: grid;
-  grid-template-columns: 190px 1fr;
-  min-height: 480px;
-  margin: -4px -18px -18px;
+  grid-template-columns: 220px 1fr;
+  min-height: 500px;
+  margin: -4px -22px -22px;
 }
 
 .settings-nav {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 8px;
+  padding: 10px;
   border-right: 1px solid var(--border);
   background: var(--surface-2);
-  border-bottom-left-radius: 14px;
+  border-bottom-left-radius: 18px;
 }
 
 .settings-nav button {
   display: flex;
   align-items: center;
-  gap: 9px;
-  height: 34px;
-  padding: 0 10px;
+  gap: 10px;
+  min-height: 38px;
+  padding: 8px 12px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: transparent;
   color: var(--text-2);
-  font-weight: 550;
+  font-weight: 600;
+  line-height: 1.25;
   text-align: left;
+}
+
+.settings-nav button svg {
+  flex-shrink: 0;
 }
 
 .settings-nav button:hover {
@@ -2211,14 +2237,36 @@ input[type='range']::-webkit-slider-thumb {
 }
 
 .settings-content {
-  padding: 16px 20px 20px;
+  padding: 22px 26px 26px;
   overflow-y: auto;
-  max-height: calc(100vh - 160px);
+  max-height: calc(100vh - 170px);
+}
+
+/* Every block in a settings page gets the same vertical rhythm, so text never touches. */
+.settings-intro {
+  margin: 0 0 22px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-section > p {
+  line-height: 1.55;
 }
 
 .settings-section + .settings-section {
-  margin-top: 20px;
-  padding-top: 18px;
+  margin-top: 24px;
+  padding-top: 22px;
   border-top: 1px solid var(--border);
 }
 
@@ -2226,19 +2274,29 @@ input[type='range']::-webkit-slider-thumb {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 12px;
+  margin: 0;
 }
 
 .settings-heading h3 {
-  font-size: 14px;
-  font-weight: 650;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.settings-section .field + .field,
+.provider-card .field + .field {
+  margin-top: 2px;
 }
 
 .key-row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+.key-row .input.grow {
+  min-width: 200px;
 }
 
 .key-saved {
@@ -2252,14 +2310,18 @@ input[type='range']::-webkit-slider-thumb {
 }
 
 .provider-card {
-  padding: 12px;
+  padding: 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--surface);
 }
 
+.provider-card > .settings-heading {
+  margin-bottom: 14px;
+}
+
 .provider-card + .provider-card {
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .provider-card.active {
@@ -2647,6 +2709,7 @@ input[type='range']::-webkit-slider-thumb {
 .preset-row {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  align-items: start;
   gap: 10px;
 }
 
@@ -2774,5 +2837,49 @@ input[type='range']::-webkit-slider-thumb {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* =====================================================================
+   Display type: titles, headings and numbers use Space Grotesk
+   ===================================================================== */
+
+h1,
+h2,
+h3,
+.brand,
+.panel-title h2,
+.modal-header h2,
+.inspector-head h2,
+.settings-heading h3,
+.section-head h3,
+.home-section-head h2,
+.ai-hero h3,
+.empty strong,
+.zoom-value,
+.export-summary strong {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.hero h1 {
+  letter-spacing: -0.025em;
+}
+
+/* Smaller screens (e.g. 1366 × 768 laptops): keep every rail item visible. */
+@media (max-height: 820px) {
+  .rail {
+    gap: 0;
+    padding: 6px;
+  }
+
+  .rail-item {
+    min-height: 44px;
+    padding: 4px 2px;
+    gap: 2px;
+  }
+
+  .rail-sep {
+    margin: 3px 0;
   }
 }

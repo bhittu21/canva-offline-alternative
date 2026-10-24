@@ -90,13 +90,16 @@ export function CanvasArea({ doc, page }: { doc: DesignDocument; page: Page }) {
 
   // ----- Page background (drawn by the shared renderer) -----
 
+  // The stage, and so this group, only mounts once the canvas area has been measured.
+  const stageReady = view.width > 0
+
   useLayoutEffect(() => {
     const group = backgroundRef.current
     if (!group) return
     group.destroyChildren()
     group.add(buildBackground(page, doc.width, doc.height, assets))
     group.getLayer()?.batchDraw()
-  }, [page.background, page.backgroundGradient, page.backgroundAssetId, doc.width, doc.height, assetVersion]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [page.background, page.backgroundGradient, page.backgroundAssetId, doc.width, doc.height, assetVersion, stageReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ----- Transformer (resize and rotate handles) -----
 

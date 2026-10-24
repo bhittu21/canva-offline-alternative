@@ -1,0 +1,48 @@
+name: Release
+
+# Builds the Windows installer and publishes it as a GitHub release.
+# The file is always called Design-Studio-Setup.exe, so this link always
+# downloads the newest version:
+#   https://github.com/<owner>/<repo>/releases/latest/download/Design-Studio-Setup.exe
+# To publish a new version: raise "version" in package.json, then push a tag
+# such as v1.0.1 (or run this workflow by hand from the Actions tab).
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run dist
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Publish the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+          if gh release view "$tag" > /dev/null 2>&1; then
+            gh release upload "$tag" dist/Design-Studio-Setup.exe --clobber
+          else
+            gh release create "$tag" dist/Design-Studio-Setup.exe \
+              --title "Design Studio $version" \
+              --notes-file docs/RELEASE_NOTES.md \
+              --target "$GITHUB_SHA" \
+              --latest
+          fi

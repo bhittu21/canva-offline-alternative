@@ -3,7 +3,7 @@
   "productName": "Design Studio",
   "version": "1.0.0",
   "private": true,
-  "description": "Offline, Canva-inspired desktop design studio for Windows",
+  "description": "Design Studio: a free, offline design app for Windows. A private Canva alternative with 1,190 templates, no login and optional AI.",
   "author": "Abir",
   "main": "out/main/index.js",
   "scripts": {
@@ -88,7 +88,7 @@
           ]
         }
       ],
-      "icon": "build/icon.png"
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -97,7 +97,7 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Design Studio",
-      "artifactName": "Design-Studio-Setup-${version}.${ext}",
+      "artifactName": "Design-Studio-Setup.${ext}",
       "deleteAppDataOnUninstall": false
     },
     "fileAssociations": [

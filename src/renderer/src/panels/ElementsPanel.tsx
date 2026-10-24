@@ -9,7 +9,7 @@ import { Chips, InsertTile, PanelFrame } from './common'
 const PREVIEW = 9
 
 function PresetTile({ preset }: { preset: ElementPreset }) {
-  return <InsertTile thumbKey={`el:${preset.id}@120`} label={preset.label} make={preset.make} render={() => presetThumb(`el:${preset.id}`, preset.make)} />
+  return <InsertTile className="tile-art" thumbKey={`el:${preset.id}@120`} label={preset.label} make={preset.make} render={() => presetThumb(`el:${preset.id}`, preset.make)} />
 }
 
 /** Shapes, lines, decorations, callouts, diagrams and mockups from the built-in library. */

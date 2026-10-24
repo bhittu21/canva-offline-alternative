@@ -1043,10 +1043,14 @@ input[type='range']::-webkit-slider-thumb {
   place-items: center;
   width: 30px;
   height: 30px;
-  border-radius: 9px;
-  background: linear-gradient(135deg, #7c5cff, #5a3df0);
-  color: #fff;
-  box-shadow: 0 2px 6px rgba(92, 57, 242, 0.35);
+  flex-shrink: 0;
+}
+
+.brand-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .topbar-sep {
@@ -3044,7 +3048,8 @@ body.resizing-panel .side-panel {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex: 0 1 200px;
+  flex: 0 1 auto;
+  width: 200px;
   min-width: 112px;
   height: 32px;
   padding: 0 6px 0 10px;
@@ -3128,4 +3133,13 @@ body.resizing-panel .side-panel {
 .tab-close:focus-visible {
   opacity: 1;
   box-shadow: var(--focus-ring);
+}
+
+/* Element previews are drawn as on a white page, so dark strokes stay visible in dark mode. */
+:root[data-theme='dark'] .tile.tile-art {
+  background: #e6e8ef;
+}
+
+:root[data-theme='dark'] .tile.tile-art:hover {
+  background: #f4f5f9;
 }

@@ -1621,6 +1621,7 @@ input[type='range']::-webkit-slider-thumb {
   border-top: 1px solid var(--border);
   background: var(--surface);
   min-width: 0;
+  position: relative;
   z-index: 6;
 }
 
@@ -1663,15 +1664,24 @@ input[type='range']::-webkit-slider-thumb {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
-  display: flex;
-  gap: 10px;
-  padding: 10px 14px;
+  bottom: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
   border-top: 1px solid var(--border);
   background: var(--surface);
   z-index: 6;
   animation: fade-in 0.12s;
+}
+
+.page-strip-track {
+  /* Centred while the pages fit; once they overflow, auto margins collapse to 0 so page 1 stays reachable. */
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: max-content;
+  margin: 0 auto;
+  padding: 10px 14px;
 }
 
 .page-thumb {

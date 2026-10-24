@@ -60,39 +60,63 @@ export function BottomBar({ doc }: { doc: DesignDocument }) {
 
 function PageStrip({ doc, activePageId }: { doc: DesignDocument; activePageId: string }) {
   const [dragId, setDragId] = useState<string | null>(null)
+  const strip = useRef<HTMLDivElement>(null)
+
+  // The mouse wheel (with or without Shift) scrolls the strip sideways. React's onWheel is passive, so attach directly.
+  useEffect(() => {
+    const el = strip.current
+    if (!el) return
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || el.scrollWidth <= el.clientWidth) return
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY
+      if (!delta) return
+      e.preventDefault()
+      el.scrollLeft += e.deltaMode === 1 ? delta * 24 : delta
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [])
+
+  // Keep the current page in view when the strip opens, the page changes or pages are added.
+  useEffect(() => {
+    strip.current?.querySelector('.page-thumb.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [activePageId, doc.pages.length])
+
   return (
-    <div className="page-strip" style={{ bottom: 'var(--bottombar-h)' }}>
-      {doc.pages.map((page, i) => (
-        <div
-          key={page.id}
-          className={`page-thumb${page.id === activePageId ? ' active' : ''}`}
-          draggable
-          onDragStart={() => setDragId(page.id)}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={() => {
-            if (dragId && dragId !== page.id) editor.movePage(dragId, i)
-            setDragId(null)
-          }}
-        >
-          <button className="frame" onClick={() => editor.setActivePage(page.id)} aria-label={`Page ${i + 1}`}>
-            <PageThumb doc={doc} page={page} />
-          </button>
-          <span className="num">{i + 1}</span>
-          <span className="page-actions">
-            <button className="icon-btn sm" title="Duplicate page" onClick={() => editor.duplicatePage(page.id)}>
-              <Copy size={13} />
+    <div className="page-strip" ref={strip}>
+      <div className="page-strip-track">
+        {doc.pages.map((page, i) => (
+          <div
+            key={page.id}
+            className={`page-thumb${page.id === activePageId ? ' active' : ''}`}
+            draggable
+            onDragStart={() => setDragId(page.id)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={() => {
+              if (dragId && dragId !== page.id) editor.movePage(dragId, i)
+              setDragId(null)
+            }}
+          >
+            <button className="frame" onClick={() => editor.setActivePage(page.id)} aria-label={`Page ${i + 1}`}>
+              <PageThumb doc={doc} page={page} />
             </button>
-            {doc.pages.length > 1 && (
-              <button className="icon-btn sm" title="Delete page" onClick={() => editor.deletePage(page.id)}>
-                <Trash2 size={13} />
+            <span className="num">{i + 1}</span>
+            <span className="page-actions">
+              <button className="icon-btn sm" title="Duplicate page" onClick={() => editor.duplicatePage(page.id)}>
+                <Copy size={13} />
               </button>
-            )}
-          </span>
-        </div>
-      ))}
-      <button className="add-page" title="Add a page" onClick={() => editor.addPage(doc.pages[doc.pages.length - 1].id)}>
-        <Plus size={18} />
-      </button>
+              {doc.pages.length > 1 && (
+                <button className="icon-btn sm" title="Delete page" onClick={() => editor.deletePage(page.id)}>
+                  <Trash2 size={13} />
+                </button>
+              )}
+            </span>
+          </div>
+        ))}
+        <button className="add-page" title="Add a page" onClick={() => editor.addPage(doc.pages[doc.pages.length - 1].id)}>
+          <Plus size={18} />
+        </button>
+      </div>
     </div>
   )
 }
@@ -118,5 +142,14 @@ export function PageThumb({ doc, page, max = 68 }: { doc: DesignDocument; page: 
       clearTimeout(timer)
     }
   }, [page, doc.width, doc.height, max, assetVersion]) // eslint-disable-line react-hooks/exhaustive-deps
-  return <span ref={holder} style={{ display: 'grid', placeItems: 'center', minWidth: (max * doc.width) / doc.height }} />
+  return (
+    <span
+      ref={holder}
+      style={{
+        display: 'grid',
+        placeItems: 'center',
+        minWidth: (max * doc.width) / doc.height
+      }}
+    />
+  )
 }

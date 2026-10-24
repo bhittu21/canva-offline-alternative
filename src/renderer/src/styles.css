@@ -950,3 +950,96 @@ h3 {
 input[type='range'] {
   accent-color: var(--accent);
 }
+
+/* ---------- Settings and online tools ---------- */
+
+.home-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.settings-heading h3 {
+  font-size: 15px;
+}
+
+.settings-heading .panel-subtitle {
+  margin-top: 0;
+}
+
+.badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge.online {
+  background: #e7f0ff;
+  color: #2457c5;
+}
+
+.notice {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff6e0;
+  color: #7a5200;
+}
+
+.key-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.key-saved {
+  flex: 1;
+  color: #1f7a3d;
+  font-weight: 500;
+}
+
+.grow {
+  flex: 1;
+}
+
+.error-text {
+  margin: 0;
+  color: var(--danger);
+}
+
+.ok-text {
+  margin: 0;
+  color: #1f7a3d;
+}
+
+.ai-tool {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.ai-tool p {
+  margin: 0;
+}
+
+.button .spinner {
+  width: 12px;
+  height: 12px;
+}

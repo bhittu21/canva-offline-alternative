@@ -3,6 +3,7 @@ import type { RecentFile } from '@shared/ipc'
 import { canvasPresets } from '@shared/presets'
 import { Icon } from './components/Icon'
 import { openDesignDialog, openDesignPath } from './io/projectIo'
+import { openDialog } from './store/uiStore'
 
 const MAX_SIDE = 10000
 
@@ -22,9 +23,14 @@ export function HomeScreen({ onCreate }: { onCreate: (width: number, height: num
     <div className="home">
       <header className="home-header">
         <h1>Offline Design Editor</h1>
-        <button className="button" onClick={() => void openDesignDialog()}>
-          <Icon name="folder" size={18} /> Open design
-        </button>
+        <div className="home-actions">
+          <button className="button" onClick={() => openDialog('settings')}>
+            <Icon name="settings" size={18} /> Settings
+          </button>
+          <button className="button" onClick={() => void openDesignDialog()}>
+            <Icon name="folder" size={18} /> Open design
+          </button>
+        </div>
       </header>
 
       <section>

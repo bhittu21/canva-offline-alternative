@@ -1,5 +1,6 @@
 import type { DesignDocument, DesignElement, FontStyle, ShapeElement, TextAlign, TextElement } from '@shared/model'
 import { Icon } from '@renderer/components/Icon'
+import { BackgroundRemoval } from './BackgroundRemoval'
 import { ColorField, NumberField } from '@renderer/components/NumberField'
 import { rotatedBounds } from '@renderer/editor/geometry'
 import { duplicateSelection } from '@renderer/editor/shortcuts'
@@ -98,6 +99,7 @@ function ElementProperties({ doc, element }: { doc: DesignDocument; element: Des
 
       {element.type === 'text' && <TextSection element={element} />}
       {element.type === 'shape' && <ShapeSection element={element} />}
+      {element.type === 'image' && <BackgroundRemoval element={element} />}
 
       <h3 className="panel-subtitle">Position and size</h3>
       <div className="field-row">

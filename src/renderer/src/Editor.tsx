@@ -63,6 +63,9 @@ export function Editor({ doc }: { doc: DesignDocument }) {
             {doc.width} × {doc.height} px{dirty ? ' · Unsaved changes' : ' · Saved'}
           </span>
         </div>
+        <button className="icon-button light" title="Settings" onClick={() => openDialog('settings')}>
+          <Icon name="settings" />
+        </button>
         <button className="button ghost" title="Change the design size" onClick={() => openDialog('resize')}>
           <Icon name="resize" size={18} /> Resize
         </button>

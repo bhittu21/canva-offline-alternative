@@ -19,6 +19,8 @@ export function buildMenu(getWindow: () => BrowserWindow | null, isDev: boolean)
         { label: 'Export...', accelerator: 'CmdOrCtrl+E', click: send('export') },
         { label: 'Import image...', accelerator: 'CmdOrCtrl+I', click: send('import-image') },
         { type: 'separator' },
+        { label: 'Settings...', click: send('settings') },
+        { type: 'separator' },
         { label: 'Close design', click: send('close-design') },
         { role: 'quit', label: 'Exit' }
       ]

@@ -82,7 +82,7 @@ with your own key and your explicit consent.
 | Feature | Likely approach | Status |
 | --- | --- | --- |
 | AI settings: provider, model, API key, test connection, per-feature switches | Keys stored with Windows credential protection, never in project files or logs | Planned |
-| Background removal | Local model first; optional API | Planned |
+| Background removal | Optional online via remove.bg (your own key, consent first). Local offline remover planned (remove.bg standalone API ends 1 Dec 2026) | Done (online) |
 | Writing help: generate, rewrite, summarise, proofread, translate | Local model or optional API | Planned |
 | Text-to-image generation | Local model (needs a capable GPU) or optional API | Planned |
 | Layout, palette and font suggestions; prompt-to-design | Optional API; local where feasible | Future |

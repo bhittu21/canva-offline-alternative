@@ -21,6 +21,7 @@ const paths = {
   save: 'M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6',
   folder: 'M3 6h6l2 2h10v11H3z',
   plus: 'M12 5v14M5 12h14',
+  settings: 'M12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6zM12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1',
   export: 'M12 15V3M7 8l5-5 5 5M4 14v6h16v-6',
   resize: 'M4 9V4h5M20 15v5h-5M4 4l7 7M20 20l-7-7'
 } as const

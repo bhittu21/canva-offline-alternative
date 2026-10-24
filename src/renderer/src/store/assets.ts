@@ -27,6 +27,11 @@ export class AssetRegistry {
     return this.assets.get(id)?.url
   }
 
+  get(id: string): { bytes: Uint8Array; mime: string } | undefined {
+    const asset = this.assets.get(id)
+    return asset && { bytes: asset.bytes, mime: asset.mime }
+  }
+
   bytesMap(): Map<string, Uint8Array> {
     return new Map([...this.assets].map(([id, asset]) => [id, asset.bytes]))
   }

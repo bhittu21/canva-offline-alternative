@@ -3,12 +3,14 @@ import { Toasts } from './components/Toasts'
 import { Editor } from './Editor'
 import { HomeScreen } from './HomeScreen'
 import { closeDesign, importImagesDialog, newDesign, openDesignDialog, openDesignPath, saveDesign } from './io/projectIo'
-import { openDialog } from './store/uiStore'
+import { SettingsDialog } from './dialogs/SettingsDialog'
+import { openDialog, useDialog } from './store/uiStore'
 import { editor, editorStore, selectDocument, selectIsDirty, useEditor } from './store/editorStore'
 
 export function App() {
   const doc = useEditor(selectDocument)
   const dirty = useEditor(selectIsDirty)
+  const dialog = useDialog()
 
   // Keep the window title and the "unsaved changes" warning on close up to date.
   useEffect(() => {
@@ -44,6 +46,9 @@ export function App() {
         case 'export':
           if (hasDoc) openDialog('export')
           break
+        case 'settings':
+          openDialog('settings')
+          break
         case 'close-design':
           if (hasDoc) closeDesign()
           break
@@ -59,6 +64,7 @@ export function App() {
   return (
     <>
       {doc ? <Editor doc={doc} /> : <HomeScreen onCreate={newDesign} />}
+      {dialog === 'settings' && <SettingsDialog onClose={() => openDialog(null)} />}
       <Toasts />
     </>
   )

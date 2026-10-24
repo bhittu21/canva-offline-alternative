@@ -12,6 +12,8 @@ import {
   writeFileAtomic
 } from './files'
 import { buildMenu } from './menu'
+import { checkAccount, removeBackground } from './removeBg'
+import { getRemoveBgState, setRemoveBgConsent, setRemoveBgKey } from './secrets'
 
 const isDev = !app.isPackaged && !!process.env['ELECTRON_RENDERER_URL']
 const projectFilter = { name: 'Design project', extensions: [PROJECT_EXTENSION] }
@@ -163,6 +165,32 @@ function registerIpc(): void {
 
   ipcMain.on('show-in-folder', (_event, path: unknown) => {
     if (typeof path === 'string') shell.showItemInFolder(path)
+  })
+
+  // ----- Optional online service: remove.bg -----
+
+  ipcMain.handle('remove-bg-state', () => getRemoveBgState())
+
+  ipcMain.handle('remove-bg-set-key', async (_event, key: unknown) => {
+    const value = typeof key === 'string' ? key.trim() : ''
+    if (value && !/^[A-Za-z0-9_-]{8,128}$/.test(value)) throw new Error('That does not look like a remove.bg API key.')
+    await setRemoveBgKey(value || null)
+    return getRemoveBgState()
+  })
+
+  ipcMain.handle('remove-bg-set-consent', async (_event, consent: unknown) => {
+    await setRemoveBgConsent(consent === true)
+    return getRemoveBgState()
+  })
+
+  ipcMain.handle('remove-bg-check', async (_event, key: unknown) =>
+    checkAccount(typeof key === 'string' && key.trim() ? key.trim() : undefined)
+  )
+
+  ipcMain.handle('remove-bg-run', async (_event, bytes: unknown, mime: unknown) => {
+    if (!(bytes instanceof Uint8Array) || typeof mime !== 'string') throw new Error('No image to process.')
+    if (!(await getRemoveBgState()).consent) throw new Error('Please agree to send the image to remove.bg first.')
+    return removeBackground(bytes, mime)
   })
 
   ipcMain.handle('list-recent-files', () => listRecentFiles())

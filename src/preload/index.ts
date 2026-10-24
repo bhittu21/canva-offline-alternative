@@ -9,6 +9,13 @@ const api: EditorApi = {
   importImagesDialog: () => ipcRenderer.invoke('import-images-dialog'),
   saveExport: (bytes, suggestedName, extension) => ipcRenderer.invoke('save-export', bytes, suggestedName, extension),
   showInFolder: (path) => ipcRenderer.send('show-in-folder', path),
+  removeBg: {
+    state: () => ipcRenderer.invoke('remove-bg-state'),
+    setKey: (key) => ipcRenderer.invoke('remove-bg-set-key', key),
+    setConsent: (consent) => ipcRenderer.invoke('remove-bg-set-consent', consent),
+    check: (key) => ipcRenderer.invoke('remove-bg-check', key),
+    run: (bytes, mime) => ipcRenderer.invoke('remove-bg-run', bytes, mime)
+  },
   listRecentFiles: () => ipcRenderer.invoke('list-recent-files'),
   addRecentFile: (path, title) => ipcRenderer.invoke('add-recent-file', path, title),
   removeRecentFile: (path) => ipcRenderer.invoke('remove-recent-file', path),

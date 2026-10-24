@@ -5,11 +5,14 @@
   "description": "Offline, Canva-inspired desktop design editor for Windows",
   "main": "out/main/index.js",
   "scripts": {
+    "predev": "install-electron",
     "dev": "electron-vite dev",
     "build": "electron-vite build",
+    "prestart": "install-electron",
     "start": "electron-vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "postinstall": "install-electron"
   },
   "dependencies": {
     "fflate": "^0.8.3",

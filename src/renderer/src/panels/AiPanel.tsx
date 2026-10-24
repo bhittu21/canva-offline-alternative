@@ -23,7 +23,7 @@ import { Modal, Segmented, Switch } from '@renderer/components/ui'
 import { cleanError, showToast } from '@renderer/components/toast'
 import { createText } from '@renderer/editor/elementFactory'
 import { renderThumbnail } from '@renderer/export/renderDesign'
-import { fonts } from '@renderer/fonts/fontList'
+import { allFonts } from '@renderer/fonts/fontList'
 import { addTemplatePages, insertImage } from '@renderer/io/projectIo'
 import { editPatches, layoutToPage, summarizePage } from '@renderer/ai/layoutToPage'
 import { providerHost, useAi, type ConsentRequest } from '@renderer/ai/useAi'
@@ -178,7 +178,7 @@ function DesignAssistant({ doc, ai }: { doc: DesignDocument; ai: Ai }) {
       style,
       brandColors: useBrand ? brand?.colors : undefined,
       brandName: useBrand ? brand?.name : undefined,
-      fonts: fonts.filter((f) => f.bundled).map((f) => f.family)
+      fonts: allFonts().filter((f) => f.source !== 'system').map((f) => f.family)
     })
     const answer = await ai.send(
       {
@@ -464,7 +464,7 @@ function LayoutAssistant({ doc, ai }: { doc: DesignDocument; ai: Ai }) {
           { role: 'system', content: 'You are a precise layout designer. You answer with a single JSON object and nothing else.' },
           {
             role: 'user',
-            content: editPrompt({ width: doc.width, height: doc.height, request, items: summarizePage(page), background: page.background, fonts: fonts.map((f) => f.family) })
+            content: editPrompt({ width: doc.width, height: doc.height, request, items: summarizePage(page), background: page.background, fonts: allFonts().filter((f) => f.source !== 'system').map((f) => f.family) })
           }
         ]
       },

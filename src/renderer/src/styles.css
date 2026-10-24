@@ -2957,3 +2957,14 @@ body.resizing-panel {
 body.resizing-panel .side-panel {
   transition: none;
 }
+
+.font-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.font-row .font-option {
+  flex: 1;
+  min-width: 0;
+}

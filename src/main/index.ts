@@ -19,6 +19,7 @@ import { getPreferences, setPreferences } from './prefs'
 import { checkAccount, removeBackground } from './removeBg'
 import { getRemoveBgState, serviceState, setRemoveBgConsent, setRemoveBgKey, setSecret } from './secrets'
 import { library, recovery, saveThumbnail, templates } from './storage'
+import { FONT_EXTENSIONS, addFontFiles, listCustomFonts, listSystemFonts, readFontFace, removeCustomFamily } from './fonts'
 import { testOverride } from './net'
 import { migrateUserData } from './migrate'
 
@@ -273,6 +274,23 @@ function registerIpc(): void {
     const path = result.filePaths[0]
     return { project: new Uint8Array(await fs.readFile(path)), name: basename(path, extname(path)) }
   })
+
+  // ----- Fonts -----
+
+  ipcMain.handle('fonts-system', () => listSystemFonts())
+  ipcMain.handle('fonts-custom', () => listCustomFonts())
+  ipcMain.handle('fonts-add-dialog', async () => {
+    const result = await dialog.showOpenDialog(mainWindow!, {
+      title: 'Add fonts',
+      buttonLabel: 'Add fonts',
+      filters: [{ name: 'Fonts', extensions: FONT_EXTENSIONS }],
+      properties: ['openFile', 'multiSelections']
+    })
+    if (result.canceled || result.filePaths.length === 0) return null
+    return addFontFiles(result.filePaths)
+  })
+  ipcMain.handle('fonts-remove', (_event, family: unknown) => removeCustomFamily(family))
+  ipcMain.handle('fonts-read', (_event, id: unknown) => readFontFace(id))
 
   ipcMain.handle('recovery-write', (_event, id: unknown, title: unknown, filePath: unknown, project: unknown, thumbnail: unknown) =>
     recovery.write(id, str(title), typeof filePath === 'string' ? filePath : null, project as Uint8Array, typeof thumbnail === 'string' ? thumbnail : undefined)

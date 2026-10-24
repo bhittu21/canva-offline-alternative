@@ -4,7 +4,7 @@ import type { BrandKit, LibraryItem } from '@shared/ipc'
 import type { DesignDocument } from '@shared/model'
 import { SectionHead } from '@renderer/components/ui'
 import { createText } from '@renderer/editor/elementFactory'
-import { fonts } from '@renderer/fonts/fontList'
+import { ensureFontFamily, useFonts } from '@renderer/fonts/fontList'
 import { addImageToLibrary } from '@renderer/io/projectIo'
 import { editor, selectedElements } from '@renderer/store/editorStore'
 import { useLibraryVersion } from '@renderer/store/libraryStore'
@@ -74,10 +74,15 @@ export function BrandPanel({ doc }: { doc: DesignDocument }) {
       for (const el of texts) if (el.type === 'text') el.fontFamily = el.fontSize >= headingCut ? brand.headingFont : brand.bodyFont
     })
 
+  const fonts = useFonts()
   const fontSelect = (label: string, value: string, key: 'headingFont' | 'bodyFont') => (
     <label className="field">
       <span className="field-label">{label}</span>
-      <select className="select" value={value} style={{ fontFamily: `"${value}"` }} onChange={(e) => save({ [key]: e.target.value })}>
+      <select className="select" value={value} style={{ fontFamily: `"${value}"` }} onChange={(e) => {
+          const family = e.target.value
+          void ensureFontFamily(family)
+          save({ [key]: family })
+        }}>
         {fonts.map((f) => (
           <option key={f.family} value={f.family}>
             {f.family}

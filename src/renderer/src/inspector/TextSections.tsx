@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
-import { AlignCenter, AlignLeft, AlignRight, Bold, CaseUpper, ChevronDown, Italic, Pencil, Underline } from 'lucide-react'
+import { AlignCenter, AlignLeft, AlignRight, Bold, CaseUpper, ChevronDown, Italic, Pencil, Plus, Underline } from 'lucide-react'
 import type { FontStyle, TextElement } from '@shared/model'
 import { ColorField } from '@renderer/components/ColorPicker'
 import { NumberField, Popover, SearchInput, Segmented, SliderField, Switch } from '@renderer/components/ui'
-import { fontInfo, fonts } from '@renderer/fonts/fontList'
+import { ensureFontFamily, fontInfo, fontNote, useFonts } from '@renderer/fonts/fontList'
+import { addFontFiles } from '@renderer/fonts/fontActions'
 import { editor } from '@renderer/store/editorStore'
 import { usePrefs } from '@renderer/store/uiStore'
 import { Section, ToggleButton, updater } from './common'
@@ -23,17 +24,17 @@ export function FontPicker({ value, onChange }: { value: string; onChange: (fami
   const [query, setQuery] = useState('')
   const brand = usePrefs()?.brand
   const brandFonts = brand ? [...new Set([brand.headingFont, brand.bodyFont])] : []
-  const list = fonts.filter((f) => !query || f.family.toLowerCase().includes(query.toLowerCase()) || f.category.toLowerCase().includes(query.toLowerCase()))
+  const fonts = useFonts()
+  const q = query.toLowerCase()
+  const list = fonts.filter((f) => !q || f.family.toLowerCase().includes(q) || fontNote(f).toLowerCase().includes(q))
+  const choose = async (family: string) => {
+    setOpen(false)
+    // Load an installed or added font first, so the text box is measured with it.
+    await ensureFontFamily(family)
+    onChange(family)
+  }
   const option = (family: string, note: string) => (
-    <button
-      key={`${note}-${family}`}
-      className={`font-option${family === value ? ' on' : ''}`}
-      style={{ fontFamily: `"${family}"` }}
-      onClick={() => {
-        onChange(family)
-        setOpen(false)
-      }}
-    >
+    <button key={`${note}-${family}`} className={`font-option${family === value ? ' on' : ''}`} style={{ fontFamily: `"${family}"` }} onClick={() => void choose(family)}>
       {family}
       <small>{note}</small>
     </button>
@@ -49,8 +50,18 @@ export function FontPicker({ value, onChange }: { value: string; onChange: (fami
           <SearchInput value={query} onChange={setQuery} placeholder="Search fonts" autoFocus />
           <div className="font-list">
             {!query && brandFonts.map((f) => option(f, 'Brand'))}
-            {list.map((f) => option(f.family, f.bundled ? f.category : 'Windows'))}
+            {list.slice(0, 400).map((f) => option(f.family, fontNote(f)))}
           </div>
+          <button
+            className="btn sm ghost"
+            style={{ width: '100%', marginTop: 6 }}
+            onClick={async () => {
+              const added = await addFontFiles()
+              if (added[0]) await choose(added[0])
+            }}
+          >
+            <Plus size={14} /> Add font files (.ttf, .otf, .woff)
+          </button>
         </Popover>
       )}
     </>

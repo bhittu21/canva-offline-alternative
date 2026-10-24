@@ -59,6 +59,13 @@ const api: EditorApi = {
     remove: (id) => invoke('templates-remove', id),
     importDialog: () => invoke('templates-import-dialog')
   },
+  fonts: {
+    system: () => invoke('fonts-system'),
+    custom: () => invoke('fonts-custom'),
+    addDialog: () => invoke('fonts-add-dialog'),
+    remove: (family) => invoke('fonts-remove', family),
+    read: (id) => invoke('fonts-read', id)
+  },
   recovery: {
     write: (id, title, filePath, project, thumbnail) => invoke('recovery-write', id, title, filePath, project, thumbnail),
     list: () => invoke('recovery-list'),

@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
-import { Type } from 'lucide-react'
+import { Plus, Trash2, Type } from 'lucide-react'
 import type { DesignDocument } from '@shared/model'
-import { Empty, SearchInput, SectionHead } from '@renderer/components/ui'
+import { Empty, LoadMore, SearchInput, SectionHead } from '@renderer/components/ui'
 import { createText, textPresets, type TextPreset } from '@renderer/editor/elementFactory'
 import { endPanelDrag, startPanelDrag } from '@renderer/editor/dnd'
 import { textCombos } from '@renderer/library/textCombos'
 import { presetThumb } from '@renderer/library/thumbnails'
-import { fonts } from '@renderer/fonts/fontList'
+import { ensureFontFamily, fontNote, useFonts } from '@renderer/fonts/fontList'
+import { addFontFiles, removeFontFamily } from '@renderer/fonts/fontActions'
+import { usePaged } from '@renderer/library/templateThumbs'
 import { editor, selectedElements } from '@renderer/store/editorStore'
 import { brandFonts, InsertTile, insertElements, PanelFrame } from './common'
 
@@ -23,12 +25,15 @@ export function TextPanel({ doc }: { doc: DesignDocument }) {
   const [query, setQuery] = useState('')
   const q = query.toLowerCase().trim()
   const combos = useMemo(() => textCombos.filter((c) => !q || `${c.label} ${c.keywords}`.toLowerCase().includes(q)), [q])
-  const fontMatches = useMemo(() => fonts.filter((f) => !q || `${f.family} ${f.category}`.toLowerCase().includes(q)), [q])
+  const fonts = useFonts()
+  const fontMatches = useMemo(() => fonts.filter((f) => !q || `${f.family} ${fontNote(f)}`.toLowerCase().includes(q)), [q, fonts])
+  const fontPage = usePaged(fontMatches, 60)
 
   const add = (preset: TextPreset, point?: { x: number; y: number }) => insertElements([createText(doc, preset, brandFonts())], 'Add text', point)
 
   /** Applies a font to the selected text, or adds a sample text box in that font. */
-  const applyFont = (family: string) => {
+  const applyFont = async (family: string) => {
+    await ensureFontFamily(family)
     const texts = selectedElements().filter((el) => el.type === 'text')
     if (texts.length > 0) editor.updateSelected((el) => (el.type === 'text' ? { fontFamily: family } : null), 'Change font')
     else insertElements([createText(doc, 'subheading', brandFonts(), { fontFamily: family, text: family })], 'Add text')
@@ -74,22 +79,37 @@ export function TextPanel({ doc }: { doc: DesignDocument }) {
         </section>
       )}
 
-      {fontMatches.length > 0 && (
-        <section className="panel-section">
-          <SectionHead title="Fonts" />
-          <p className="muted small" style={{ margin: '0 0 6px' }}>
-            Click a font to use it on the selected text, or to add a sample.
-          </p>
+      <section className="panel-section">
+        <SectionHead
+          title="Fonts"
+          action={
+            <button className="btn sm ghost" onClick={() => void addFontFiles()} title="Add .ttf, .otf, .woff or .woff2 font files">
+              <Plus size={14} /> Add fonts
+            </button>
+          }
+        />
+        <p className="muted small" style={{ margin: '0 0 6px' }}>
+          Click a font to use it on the selected text, or to add a sample. Fonts installed on this computer are listed too; add font files to use any other font offline.
+        </p>
+        {fontMatches.length > 0 && (
           <div className="font-list" style={{ maxHeight: 'none', margin: 0 }}>
-            {fontMatches.map((f) => (
-              <button key={f.family} className="font-option" style={{ fontFamily: `"${f.family}"` }} onClick={() => applyFont(f.family)}>
-                {f.family}
-                <small>{f.bundled ? f.category : 'Windows font'}</small>
-              </button>
+            {fontPage.shown.map((f) => (
+              <div key={f.family} className="font-row">
+                <button className="font-option" style={{ fontFamily: `"${f.family}"` }} onClick={() => void applyFont(f.family)}>
+                  {f.family}
+                  <small>{fontNote(f)}</small>
+                </button>
+                {f.source === 'custom' && (
+                  <button className="icon-btn sm" title={`Remove “${f.family}”`} aria-label={`Remove ${f.family}`} onClick={() => void removeFontFamily(f.family)}>
+                    <Trash2 size={13} />
+                  </button>
+                )}
+              </div>
             ))}
+            <LoadMore remaining={fontPage.more} onMore={fontPage.showMore} label="Show more fonts" />
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       {combos.length === 0 && fontMatches.length === 0 && (
         <Empty icon={<Type size={28} />} title="Nothing matches">

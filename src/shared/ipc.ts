@@ -145,6 +145,27 @@ export interface AiLogEntry {
   error?: string
 }
 
+// ----- Fonts -----
+
+/** One face (regular, bold, italic or bold italic) of a font installed on this computer or added by the user. */
+export interface FontFaceInfo {
+  id: string
+  family: string
+  /** The style name inside the font, e.g. "Bold Italic". */
+  style: string
+  bold: boolean
+  italic: boolean
+  /** File type: ttf, otf, ttc, woff or woff2. */
+  format: string
+  /** Original file name, for fonts the user added. */
+  file?: string
+}
+
+export interface AddFontsResult {
+  added: FontFaceInfo[]
+  skipped: { name: string; reason: string }[]
+}
+
 // ----- Preferences, library, templates, recovery -----
 
 export interface BrandKit {
@@ -294,6 +315,18 @@ export interface EditorApi {
     remove(id: string): Promise<void>
     /** Picks a .odesign file and adds it as a template. */
     importDialog(): Promise<{ project: Uint8Array; name: string } | null>
+  }
+
+  fonts: {
+    /** Fonts installed on this computer. */
+    system(): Promise<FontFaceInfo[]>
+    /** Fonts the user added to the app. */
+    custom(): Promise<FontFaceInfo[]>
+    /** Picks font files and adds them; null if cancelled. */
+    addDialog(): Promise<AddFontsResult | null>
+    /** Removes every face of an added font family. */
+    remove(family: string): Promise<void>
+    read(id: string): Promise<Uint8Array>
   }
 
   recovery: {

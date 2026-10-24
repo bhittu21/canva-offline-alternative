@@ -1,4 +1,4 @@
-# Offline Design Studio
+# Design Studio
 
 A Canva-inspired design studio for Windows that works completely offline. No
 account, no login, no cloud: your designs are saved as files on your own PC.
@@ -57,8 +57,8 @@ APIs or servers.
 ## Install on Windows (no developer tools needed)
 
 1. Open the repository's **Actions** tab on GitHub, pick the latest green
-   **CI** run on `main`, and download **Offline-Design-Studio-Setup** at the bottom.
-2. Unzip it and run `Offline-Design-Studio-Setup-<version>.exe`.
+   **CI** run on `main`, and download **Design-Studio-Setup** at the bottom.
+2. Unzip it and run `Design-Studio-Setup-<version>.exe`.
 3. Windows SmartScreen may say "Windows protected your PC" because the installer
    is not code-signed. Click **More info**, then **Run anyway**.
 4. The installer is per-user (no administrator rights needed). It adds Start
@@ -74,8 +74,8 @@ Uninstall from **Settings › Apps**. Your designs and settings are kept.
 
    ```
    cd %USERPROFILE%\Documents
-   git clone https://github.com/bhittu21/offline-design-editor.git
-   cd offline-design-editor
+   git clone https://github.com/bhittu21/design-studio.git
+   cd design-studio
    npm install
    npm run dev
    ```

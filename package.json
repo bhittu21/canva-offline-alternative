@@ -1,6 +1,6 @@
 {
-  "name": "offline-design-editor",
-  "productName": "Offline Design Studio",
+  "name": "design-studio",
+  "productName": "Design Studio",
   "version": "1.0.0",
   "private": true,
   "description": "Offline, Canva-inspired desktop design studio for Windows",
@@ -69,8 +69,8 @@
     "zustand": "^5.0.16"
   },
   "build": {
-    "appId": "com.offline-design-studio.app",
-    "productName": "Offline Design Studio",
+    "appId": "com.design-studio.app",
+    "productName": "Design Studio",
     "directories": {
       "output": "dist",
       "buildResources": "build"
@@ -96,15 +96,15 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Offline Design Studio",
-      "artifactName": "Offline-Design-Studio-Setup-${version}.${ext}",
+      "shortcutName": "Design Studio",
+      "artifactName": "Design-Studio-Setup-${version}.${ext}",
       "deleteAppDataOnUninstall": false
     },
     "fileAssociations": [
       {
         "ext": "odesign",
         "name": "Design Studio project",
-        "description": "Offline Design Studio design",
+        "description": "Design Studio design",
         "role": "Editor"
       }
     ]

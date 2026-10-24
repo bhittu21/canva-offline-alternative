@@ -569,7 +569,7 @@ function AboutTab() {
   return (
     <>
       <section className="settings-section">
-        <Heading title="Offline Design Studio" />
+        <Heading title="Design Studio" />
         <p className="small">
           A design editor that runs entirely on this PC. There is no account, no cloud and no tracking. Designs are ordinary <code>.odesign</code> files wherever you save them.
         </p>

@@ -1,6 +1,6 @@
 # Roadmap
 
-Offline Design Studio is an independent, Canva-inspired desktop design app for
+Design Studio is an independent, Canva-inspired desktop design app for
 Windows. It does not use Canva's code, templates, assets, APIs or servers, and
 it never needs a Canva account.
 

@@ -149,7 +149,7 @@ async function fail(config: AiProviderConfig, response: Response): Promise<never
 async function openaiChat(config: AiProviderConfig, key: string | null, p: ChatParams): Promise<AiChatResult> {
   const headers: Record<string, string> = key ? { Authorization: `Bearer ${key}` } : {}
   if (config.baseUrl.includes('openrouter.ai')) {
-    headers['X-Title'] = 'Offline Design Studio'
+    headers['X-Title'] = 'Design Studio'
   }
   const official = config.baseUrl.includes('api.openai.com')
   const body: Record<string, unknown> = { model: config.model, messages: p.messages }

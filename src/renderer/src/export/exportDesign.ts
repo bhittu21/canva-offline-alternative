@@ -32,8 +32,8 @@ export async function exportDesign(
   if (options.format === 'pdf') {
     const pdf = await PDFDocument.create()
     pdf.setTitle(doc.title)
-    pdf.setCreator('Offline Design Studio')
-    pdf.setProducer('Offline Design Studio')
+    pdf.setCreator('Design Studio')
+    pdf.setProducer('Design Studio')
     const pageSize = pdfPageSize(size.width, size.height, options.dpi)
     for (let i = 0; i < pages.length; i++) {
       onProgress?.(i, pages.length)

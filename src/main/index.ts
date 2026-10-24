@@ -20,6 +20,7 @@ import { checkAccount, removeBackground } from './removeBg'
 import { getRemoveBgState, serviceState, setRemoveBgConsent, setRemoveBgKey, setSecret } from './secrets'
 import { library, recovery, saveThumbnail, templates } from './storage'
 import { testOverride } from './net'
+import { migrateUserData } from './migrate'
 
 const isDev = !app.isPackaged && !!process.env['ELECTRON_RENDERER_URL']
 const projectFilter = { name: 'Design project', extensions: [PROJECT_EXTENSION] }
@@ -49,7 +50,7 @@ function createWindow(): void {
     minHeight: 600,
     show: false,
     backgroundColor: '#f4f5f7',
-    title: 'Offline Design Studio',
+    title: 'Design Studio',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
@@ -316,13 +317,14 @@ function registerIpc(): void {
 
   ipcMain.on('document-state', (_event, state: { dirty?: unknown; title?: unknown }) => {
     documentState = { dirty: state?.dirty === true, title: String(state?.title ?? '') }
-    mainWindow?.setTitle(`${documentState.dirty ? '• ' : ''}${documentState.title || 'Untitled design'} - Offline Design Studio`)
+    mainWindow?.setTitle(`${documentState.dirty ? '• ' : ''}${documentState.title || 'Untitled design'} - Design Studio`)
   })
 }
 
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
+  migrateUserData()
   app.on('second-instance', (_event, argv) => {
     const path = findProjectArg(argv)
     if (!mainWindow) return
@@ -332,7 +334,7 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   app.whenReady().then(() => {
-    app.setAppUserModelId('com.offline-design-studio.app')
+    app.setAppUserModelId('com.design-studio.app')
     blockNetwork()
     registerIpc()
     Menu.setApplicationMenu(buildMenu(() => mainWindow, isDev))

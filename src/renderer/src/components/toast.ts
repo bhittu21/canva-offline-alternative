@@ -16,9 +16,14 @@ export function showToast(message: string, kind: Toast['kind'] = 'info'): void {
   setTimeout(() => toastStore.setState((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })), kind === 'error' ? 7000 : 3000)
 }
 
+/** The readable part of an error, without Electron's "Error invoking remote method" prefix. */
+export function cleanError(error: unknown, fallback = 'Something went wrong.'): string {
+  const message = error instanceof Error ? error.message : typeof error === 'string' ? error : ''
+  return message.replace(/^Error invoking remote method '[^']+': /, '').replace(/^(Error|ServiceError): /, '') || fallback
+}
+
 export function showError(error: unknown, fallback = 'Something went wrong.'): void {
-  const message = error instanceof Error ? error.message.replace(/^Error invoking remote method '[^']+': (Error: )?/, '') : fallback
-  showToast(message || fallback, 'error')
+  showToast(cleanError(error, fallback), 'error')
 }
 
 export function useToasts(): Toast[] {

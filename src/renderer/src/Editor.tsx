@@ -1,108 +1,146 @@
-import { useState } from 'react'
+import { useEffect, type ReactNode } from 'react'
+import {
+  BarChart3,
+  Bot,
+  FolderKanban,
+  Frame,
+  Image,
+  Layers,
+  LayoutTemplate,
+  Paintbrush,
+  Palette,
+  Shapes,
+  Smile,
+  Type,
+  Upload
+} from 'lucide-react'
 import type { DesignDocument } from '@shared/model'
-import { Icon, type IconName } from './components/Icon'
+import { CanvasArea } from './editor/CanvasArea'
+import { handleKeyDown, handlePaste } from './editor/commands'
+import { ContextMenu } from './shell/ContextMenu'
+import { TopBar } from './shell/TopBar'
+import { BottomBar } from './shell/BottomBar'
+import { Inspector } from './inspector/Inspector'
+import { DesignPanel } from './panels/DesignPanel'
+import { ElementsPanel } from './panels/ElementsPanel'
+import { TextPanel } from './panels/TextPanel'
+import { PhotosPanel } from './panels/PhotosPanel'
+import { IconsPanel } from './panels/IconsPanel'
+import { UploadsPanel } from './panels/UploadsPanel'
+import { BackgroundsPanel } from './panels/BackgroundsPanel'
+import { FramesPanel } from './panels/FramesPanel'
+import { ChartsPanel } from './panels/ChartsPanel'
+import { BrandPanel } from './panels/BrandPanel'
+import { AiPanel } from './panels/AiPanel'
+import { ProjectsPanel } from './panels/ProjectsPanel'
+import { LayersPanel } from './panels/LayersPanel'
 import { ExportDialog } from './dialogs/ExportDialog'
 import { ResizeDialog } from './dialogs/ResizeDialog'
-import { CanvasArea } from './editor/CanvasArea'
-import { useEditorShortcuts } from './editor/shortcuts'
-import { closeDesign, saveDesign } from './io/projectIo'
-import { ElementsPanel } from './panels/ElementsPanel'
-import { LayersPanel } from './panels/LayersPanel'
-import { PropertiesPanel } from './panels/PropertiesPanel'
-import { TextPanel } from './panels/TextPanel'
-import { UploadsPanel } from './panels/UploadsPanel'
-import { editor, selectIsDirty, useEditor } from './store/editorStore'
-import { openDialog, useDialog } from './store/uiStore'
+import { SaveTemplateDialog } from './dialogs/SaveTemplateDialog'
+import { selectActivePage, useEditor } from './store/editorStore'
+import { openDialog, openPanel, useDialog, useUi, type PanelId } from './store/uiStore'
 
-type Tab = 'text' | 'elements' | 'uploads' | 'layers'
-
-const tabs: { id: Tab; label: string; icon: IconName }[] = [
-  { id: 'text', label: 'Text', icon: 'text' },
-  { id: 'elements', label: 'Elements', icon: 'shapes' },
-  { id: 'uploads', label: 'Uploads', icon: 'image' },
-  { id: 'layers', label: 'Layers', icon: 'layers' }
+const rail: ({ id: PanelId; label: string; icon: ReactNode; className?: string } | 'sep')[] = [
+  { id: 'design', label: 'Design', icon: <LayoutTemplate size={21} /> },
+  { id: 'elements', label: 'Elements', icon: <Shapes size={21} /> },
+  { id: 'text', label: 'Text', icon: <Type size={21} /> },
+  { id: 'photos', label: 'Photos', icon: <Image size={21} /> },
+  { id: 'icons', label: 'Icons', icon: <Smile size={21} /> },
+  { id: 'uploads', label: 'Uploads', icon: <Upload size={21} /> },
+  { id: 'backgrounds', label: 'Background', icon: <Paintbrush size={21} /> },
+  { id: 'frames', label: 'Frames', icon: <Frame size={21} /> },
+  { id: 'charts', label: 'Charts', icon: <BarChart3 size={21} /> },
+  'sep',
+  { id: 'brand', label: 'Brand', icon: <Palette size={21} /> },
+  { id: 'ai', label: 'AI Studio', icon: <Bot size={21} />, className: 'ai' },
+  { id: 'projects', label: 'Projects', icon: <FolderKanban size={21} /> },
+  { id: 'layers', label: 'Layers', icon: <Layers size={21} /> }
 ]
 
+function PanelContent({ panel, doc }: { panel: PanelId; doc: DesignDocument }) {
+  switch (panel) {
+    case 'design':
+      return <DesignPanel doc={doc} />
+    case 'elements':
+      return <ElementsPanel doc={doc} />
+    case 'text':
+      return <TextPanel doc={doc} />
+    case 'photos':
+      return <PhotosPanel doc={doc} />
+    case 'icons':
+      return <IconsPanel doc={doc} />
+    case 'uploads':
+      return <UploadsPanel doc={doc} />
+    case 'backgrounds':
+      return <BackgroundsPanel doc={doc} />
+    case 'frames':
+      return <FramesPanel doc={doc} />
+    case 'charts':
+      return <ChartsPanel doc={doc} />
+    case 'brand':
+      return <BrandPanel doc={doc} />
+    case 'ai':
+      return <AiPanel doc={doc} />
+    case 'projects':
+      return <ProjectsPanel />
+    case 'layers':
+      return <LayersPanel doc={doc} />
+  }
+}
+
 export function Editor({ doc }: { doc: DesignDocument }) {
-  const [tab, setTab] = useState<Tab>('text')
-  const canUndo = useEditor((s) => (s.history?.past.length ?? 0) > 0)
-  const canRedo = useEditor((s) => (s.history?.future.length ?? 0) > 0)
-  const dirty = useEditor(selectIsDirty)
+  const page = useEditor(selectActivePage) ?? doc.pages[0]
+  const panel = useUi((s) => s.panel)
+  const panelOpen = useUi((s) => s.panelOpen)
   const dialog = useDialog()
-  useEditorShortcuts()
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('paste', handlePaste)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('paste', handlePaste)
+    }
+  }, [])
 
   return (
     <div className="editor">
-      <header className="topbar">
-        <button className="icon-button light" title="Home" onClick={closeDesign}>
-          <Icon name="home" />
-        </button>
-        <div className="topbar-group">
-          <button className="icon-button light" title="Undo (Ctrl+Z)" disabled={!canUndo} onClick={editor.undo}>
-            <Icon name="undo" />
-          </button>
-          <button className="icon-button light" title="Redo (Ctrl+Y)" disabled={!canRedo} onClick={editor.redo}>
-            <Icon name="redo" />
-          </button>
-        </div>
-        <div className="topbar-title">
-          <input
-            aria-label="Design title"
-            value={doc.title}
-            onChange={(e) =>
-              editor.change(
-                'Rename design',
-                (d) => {
-                  d.title = e.target.value
-                },
-                { mergeKey: 'title' }
-              )
-            }
-          />
-          <span className="topbar-meta">
-            {doc.width} × {doc.height} px{dirty ? ' · Unsaved changes' : ' · Saved'}
-          </span>
-        </div>
-        <button className="icon-button light" title="Settings" onClick={() => openDialog('settings')}>
-          <Icon name="settings" />
-        </button>
-        <button className="button ghost" title="Change the design size" onClick={() => openDialog('resize')}>
-          <Icon name="resize" size={18} /> Resize
-        </button>
-        <button className="button ghost" title="Save (Ctrl+S)" onClick={() => void saveDesign(false)}>
-          <Icon name="save" size={18} /> Save
-        </button>
-        <button className="button primary" title="Export (Ctrl+E)" onClick={() => openDialog('export')}>
-          <Icon name="export" size={18} /> Export
-        </button>
-      </header>
+      <TopBar doc={doc} />
 
-      <nav className="rail" aria-label="Tools">
-        {tabs.map((t) => (
-          <button key={t.id} className={`rail-item${tab === t.id ? ' active' : ''}`} onClick={() => setTab(t.id)}>
-            <Icon name={t.icon} size={22} />
-            <span>{t.label}</span>
-          </button>
-        ))}
+      <nav className="rail" aria-label="Panels">
+        {rail.map((item, i) =>
+          item === 'sep' ? (
+            <span key={i} className="rail-sep" />
+          ) : (
+            <button
+              key={item.id}
+              className={`rail-item${item.className ? ` ${item.className}` : ''}${panelOpen && panel === item.id ? ' active' : ''}`}
+              aria-pressed={panelOpen && panel === item.id}
+              onClick={() => openPanel(item.id)}
+            >
+              <span className="rail-icon">{item.icon}</span>
+              <span>{item.label}</span>
+            </button>
+          )
+        )}
       </nav>
 
-      <aside className="side-panel">
-        {tab === 'text' && <TextPanel doc={doc} />}
-        {tab === 'elements' && <ElementsPanel doc={doc} />}
-        {tab === 'uploads' && <UploadsPanel doc={doc} />}
-        {tab === 'layers' && <LayersPanel doc={doc} />}
+      <aside className={`side-panel${panelOpen ? '' : ' closed'}`} aria-label="Side panel">
+        {panelOpen && <PanelContent panel={panel} doc={doc} />}
       </aside>
 
       <main className="workspace">
-        <CanvasArea doc={doc} />
+        <CanvasArea doc={doc} page={page} />
       </main>
 
-      <aside className="properties">
-        <PropertiesPanel doc={doc} />
-      </aside>
+      <BottomBar doc={doc} />
 
+      <Inspector doc={doc} page={page} />
+
+      <ContextMenu />
       {dialog === 'export' && <ExportDialog doc={doc} onClose={() => openDialog(null)} />}
       {dialog === 'resize' && <ResizeDialog doc={doc} onClose={() => openDialog(null)} />}
+      {dialog === 'save-template' && <SaveTemplateDialog doc={doc} onClose={() => openDialog(null)} />}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { TextElement } from '@shared/model'
 import { editor } from '@renderer/store/editorStore'
-import { measureTextHeight } from './textMeasure'
+import { withTextHeight } from './textMeasure'
 
 interface Props {
   element: TextElement
@@ -38,12 +38,12 @@ export function TextEditor({ element, view }: Props) {
     if (!commit || value === element.text) return
     if (value.trim() === '') {
       // An emptied text box is removed, like in Canva.
-      editor.change('Delete text', (doc) => {
-        doc.elements = doc.elements.filter((el) => el.id !== element.id)
+      editor.changePage('Delete text', (page) => {
+        page.elements = page.elements.filter((el) => el.id !== element.id)
       })
       return
     }
-    editor.updateElement(element.id, { text: value, height: measureTextHeight({ ...element, text: value }) }, 'Edit text')
+    editor.updateElement(element.id, withTextHeight(element, { text: value }), 'Edit text')
   }
 
   const italic = element.fontStyle.includes('italic')
@@ -67,7 +67,8 @@ export function TextEditor({ element, view }: Props) {
         top: view.y + element.y * view.zoom,
         width: element.width * view.zoom,
         transform: `rotate(${element.rotation}deg)`,
-        fontFamily: element.fontFamily,
+        fontFamily: `"${element.fontFamily}"`,
+        textTransform: element.uppercase ? 'uppercase' : 'none',
         fontSize: element.fontSize * view.zoom,
         fontWeight: bold ? 'bold' : 'normal',
         fontStyle: italic ? 'italic' : 'normal',

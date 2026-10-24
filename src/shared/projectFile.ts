@@ -1,6 +1,6 @@
 import { strFromU8, strToU8, unzipSync, zipSync, type Zippable } from 'fflate'
 import { PROJECT_EXTENSION } from './constants'
-import { designDocumentSchema, SCHEMA_VERSION, type DesignDocument } from './model'
+import { designDocumentSchema, migrateDocument, SCHEMA_VERSION, usedAssetIds, type DesignDocument } from './model'
 
 /**
  * A project is one self-contained zip file:
@@ -8,6 +8,7 @@ import { designDocumentSchema, SCHEMA_VERSION, type DesignDocument } from './mod
  *   manifest.json    format name and schema version
  *   document.json    the design document
  *   assets/<id>      every image the design uses, as the original bytes
+ *   thumbnail.png    optional small preview of the first page
  *
  * Keeping images inside the file means a design never loses its pictures when
  * the file is moved, copied or opened on another PC.
@@ -28,16 +29,13 @@ export class ProjectFileError extends Error {
   }
 }
 
-/** Returns the asset ids referenced by elements, in first-use order. */
-export function usedAssetIds(document: DesignDocument): string[] {
-  const ids = new Set<string>()
-  for (const element of document.elements) {
-    if (element.type === 'image') ids.add(element.assetId)
-  }
-  return [...ids]
-}
+export { usedAssetIds }
 
-export function encodeProject(document: DesignDocument, assets: ReadonlyMap<string, Uint8Array>): Uint8Array {
+export function encodeProject(
+  document: DesignDocument,
+  assets: ReadonlyMap<string, Uint8Array>,
+  thumbnail?: Uint8Array
+): Uint8Array {
   const used = usedAssetIds(document)
   for (const id of used) {
     if (!assets.has(id)) throw new ProjectFileError(`Image ${id} is missing and cannot be saved.`)
@@ -54,6 +52,7 @@ export function encodeProject(document: DesignDocument, assets: ReadonlyMap<stri
     // Images are already compressed, so store them as-is.
     files[`assets/${id}`] = [assets.get(id)!, { level: 0 }]
   }
+  if (thumbnail) files['thumbnail.png'] = [thumbnail, { level: 0 }]
   return zipSync(files, { level: 6 })
 }
 
@@ -73,7 +72,7 @@ export function decodeProject(bytes: Uint8Array): ProjectContents {
     throw new ProjectFileError('This project was made with a newer version of the app. Please update the app.')
   }
 
-  const raw = migrate(readJson(files, 'document.json'), manifest.schemaVersion)
+  const raw = migrateDocument(readJson(files, 'document.json'), manifest.schemaVersion)
   const parsed = designDocumentSchema.safeParse(raw)
   if (!parsed.success) {
     throw new ProjectFileError('The design inside this file is damaged and cannot be opened.')
@@ -101,13 +100,11 @@ function readJson(files: Record<string, Uint8Array>, name: string): unknown {
   }
 }
 
-/** Upgrades older documents step by step. Version 1 is the first format, so there is nothing to do yet. */
-function migrate(raw: unknown, fromVersion: number): unknown {
-  let doc = raw
-  for (let version = fromVersion; version < SCHEMA_VERSION; version++) {
-    doc = migrations[version]?.(doc) ?? doc
+/** Reads only the preview image, for lists of recent designs. */
+export function readThumbnail(bytes: Uint8Array): Uint8Array | null {
+  try {
+    return unzipSync(bytes, { filter: (file) => file.name === 'thumbnail.png' })['thumbnail.png'] ?? null
+  } catch {
+    return null
   }
-  return doc
 }
-
-const migrations: Record<number, (doc: unknown) => unknown> = {}

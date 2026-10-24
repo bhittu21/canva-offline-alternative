@@ -15,6 +15,7 @@ export function buildMenu(getWindow: () => BrowserWindow | null, isDev: boolean)
         { type: 'separator' },
         { label: 'Save', accelerator: 'CmdOrCtrl+S', click: send('save') },
         { label: 'Save as...', accelerator: 'CmdOrCtrl+Shift+S', click: send('save-as') },
+        { label: 'Make a copy', click: send('duplicate') },
         { type: 'separator' },
         { label: 'Export...', accelerator: 'CmdOrCtrl+E', click: send('export') },
         { label: 'Import image...', accelerator: 'CmdOrCtrl+I', click: send('import-image') },
@@ -35,7 +36,9 @@ export function buildMenu(getWindow: () => BrowserWindow | null, isDev: boolean)
         // menu items must not swallow the shortcuts.
         { role: 'cut', registerAccelerator: false },
         { role: 'copy', registerAccelerator: false },
-        { role: 'paste', registerAccelerator: false }
+        { role: 'paste', registerAccelerator: false },
+        { type: 'separator' },
+        { label: 'Search commands...', accelerator: 'CmdOrCtrl+K', registerAccelerator: false, click: send('command-palette') }
       ]
     },
     {

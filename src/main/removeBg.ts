@@ -1,4 +1,5 @@
 import { getRemoveBgKey } from './secrets'
+import { testOverride } from './net'
 
 /**
  * Optional online feature: background removal by remove.bg
@@ -6,7 +7,7 @@ import { getRemoveBgKey } from './secrets'
  * API key never reaches the UI. Everything else in the app works offline.
  */
 
-const API_BASE = process.env['REMOVE_BG_API_BASE'] || 'https://api.remove.bg/v1.0'
+const API_BASE = testOverride('REMOVE_BG_API_BASE') || 'https://api.remove.bg/v1.0'
 const MAX_UPLOAD_BYTES = 22 * 1024 * 1024
 const TIMEOUT_MS = 60_000
 

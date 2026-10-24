@@ -63,10 +63,10 @@ describe('editor store', () => {
     actions.addElements([shape('a'), shape('b')])
     expect(store.getState().selectedIds).toEqual(['a', 'b'])
     actions.deleteSelected()
-    expect(store.getState().history!.present.elements).toHaveLength(0)
+    expect(store.getState().history!.present.pages[0].elements).toHaveLength(0)
     expect(store.getState().selectedIds).toEqual([])
     actions.undo()
-    expect(ids(store.getState().history!.present.elements)).toBe('ab')
+    expect(ids(store.getState().history!.present.pages[0].elements)).toBe('ab')
   })
 
   it('does not delete locked elements', () => {
@@ -75,7 +75,7 @@ describe('editor store', () => {
     actions.open(createDocument(100, 100), null)
     actions.addElements([{ ...shape('a'), locked: true }, shape('b')])
     actions.deleteSelected()
-    expect(ids(store.getState().history!.present.elements)).toBe('a')
+    expect(ids(store.getState().history!.present.pages[0].elements)).toBe('a')
   })
 
   it('moves a layer to a new position', () => {
@@ -84,6 +84,54 @@ describe('editor store', () => {
     actions.open(createDocument(100, 100), null)
     actions.addElements(['a', 'b', 'c'].map(shape))
     actions.moveLayer('a', 2)
-    expect(ids(store.getState().history!.present.elements)).toBe('bca')
+    expect(ids(store.getState().history!.present.pages[0].elements)).toBe('bca')
+  })
+})
+
+describe('groups and pages', () => {
+  it('selects a whole group when one member is selected, and ungroups', () => {
+    const store = createEditorStore()
+    const { actions } = store
+    actions.open(createDocument(100, 100), null)
+    actions.addElements(['a', 'b', 'c'].map(shape))
+    actions.select(['a', 'b'])
+    actions.group()
+    actions.select(['a'])
+    expect(store.getState().selectedIds).toEqual(['a', 'b'])
+    actions.ungroup()
+    actions.select(['a'])
+    expect(store.getState().selectedIds).toEqual(['a'])
+  })
+
+  it('aligns a whole group to the page as one block', () => {
+    const store = createEditorStore()
+    const { actions } = store
+    actions.open(createDocument(100, 100), null)
+    actions.addElements([shape('a'), { ...shape('b'), x: 20 }])
+    actions.group()
+    actions.align('right')
+    const [a, b] = store.getState().history!.present.pages[0].elements
+    expect(b.x + b.width).toBeCloseTo(100)
+    expect(b.x - a.x).toBeCloseTo(20)
+  })
+
+  it('adds, duplicates, reorders and deletes pages with undo', () => {
+    const store = createEditorStore()
+    const { actions } = store
+    actions.open(createDocument(100, 100), null)
+    const first = store.getState().activePageId!
+    actions.addElements([shape('a')])
+    actions.duplicatePage(first)
+    const pages = () => store.getState().history!.present.pages
+    expect(pages()).toHaveLength(2)
+    expect(pages()[1].elements[0].id).not.toBe('a')
+    actions.addPage()
+    expect(pages()).toHaveLength(3)
+    actions.movePage(first, 2)
+    expect(pages()[2].id).toBe(first)
+    actions.deletePage(first)
+    expect(pages()).toHaveLength(2)
+    actions.undo()
+    expect(pages()).toHaveLength(3)
   })
 })

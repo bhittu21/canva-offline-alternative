@@ -1,6 +1,7 @@
 import { promises as fs } from 'node:fs'
 import { basename, extname } from 'node:path'
 import { app } from 'electron'
+import { readThumbnailDataUrl } from './storage'
 import type { ImportedImage, RecentFile } from '@shared/ipc'
 import { PROJECT_EXTENSION } from '@shared/constants'
 
@@ -84,7 +85,8 @@ export async function listRecentFiles(): Promise<RecentFile[]> {
       }
     })
   )
-  return entries.filter((_, i) => checks[i])
+  const existing = entries.filter((_, i) => checks[i])
+  return Promise.all(existing.map(async (entry) => ({ ...entry, thumbnail: await readThumbnailDataUrl(entry.path) })))
 }
 
 async function writeRecentFiles(entries: RecentFile[]): Promise<void> {
@@ -92,7 +94,7 @@ async function writeRecentFiles(entries: RecentFile[]): Promise<void> {
 }
 
 export async function addRecentFile(path: string, title: string): Promise<void> {
-  const entries = (await listRecentFiles()).filter((entry) => entry.path !== path)
+  const entries = (await listRecentFiles()).filter((entry) => entry.path !== path).map(({ thumbnail: _t, ...rest }) => rest)
   entries.unshift({ path, title, openedAt: new Date().toISOString() })
   await writeRecentFiles(entries.slice(0, MAX_RECENT))
   app.addRecentDocument(path)
@@ -100,5 +102,5 @@ export async function addRecentFile(path: string, title: string): Promise<void> 
 
 export async function removeRecentFile(path: string): Promise<void> {
   const entries = await listRecentFiles()
-  await writeRecentFiles(entries.filter((entry) => entry.path !== path))
+  await writeRecentFiles(entries.filter((entry) => entry.path !== path).map(({ thumbnail: _t, ...rest }) => rest))
 }

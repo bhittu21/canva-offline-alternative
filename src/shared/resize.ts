@@ -30,7 +30,11 @@ export function resizeDocument(doc: DesignDocument, width: number, height: numbe
     ...doc,
     width: w,
     height: h,
-    elements: doc.elements.map((el) => transformElement(el, scale, dx, dy))
+    pages: doc.pages.map((page) => ({
+      ...page,
+      elements: page.elements.map((el) => transformElement(el, scale, dx, dy)),
+      guides: undefined
+    }))
   }
 }
 
@@ -43,13 +47,32 @@ export function transformElement<T extends DesignElement>(el: T, scale: number, 
     width: el.width * scale,
     height: el.height * scale
   }
-  if (moved.type === 'text') {
-    return { ...moved, fontSize: moved.fontSize * scale, letterSpacing: moved.letterSpacing * scale }
+  if (moved.shadow) {
+    moved.shadow = { ...moved.shadow, blur: moved.shadow.blur * scale, offsetX: moved.shadow.offsetX * scale, offsetY: moved.shadow.offsetY * scale }
   }
-  if (moved.type === 'shape') {
-    return { ...moved, strokeWidth: moved.strokeWidth * scale, cornerRadius: moved.cornerRadius * scale }
+  switch (moved.type) {
+    case 'text':
+      return {
+        ...moved,
+        fontSize: moved.fontSize * scale,
+        letterSpacing: moved.letterSpacing * scale,
+        ...(moved.strokeWidth !== undefined && { strokeWidth: moved.strokeWidth * scale })
+      }
+    case 'shape':
+      return { ...moved, strokeWidth: moved.strokeWidth * scale, cornerRadius: moved.cornerRadius * scale }
+    case 'line':
+      return { ...moved, strokeWidth: Math.max(0.1, moved.strokeWidth * scale) }
+    case 'image':
+      return {
+        ...moved,
+        ...(moved.cornerRadius !== undefined && { cornerRadius: moved.cornerRadius * scale }),
+        ...(moved.borderWidth !== undefined && { borderWidth: moved.borderWidth * scale })
+      }
+    case 'table':
+      return { ...moved, fontSize: moved.fontSize * scale, borderWidth: moved.borderWidth * scale }
+    default:
+      return moved
   }
-  return moved
 }
 
 export interface AspectRatio {

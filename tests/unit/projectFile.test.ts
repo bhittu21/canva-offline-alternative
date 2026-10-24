@@ -5,12 +5,12 @@ import { decodeProject, encodeProject, ProjectFileError } from '@shared/projectF
 
 function sampleDocument(): DesignDocument {
   const doc = createDocument(1080, 1080, 'Poster')
-  doc.background = '#fafafa'
+  doc.pages[0].background = '#fafafa'
   doc.assets = [
     { id: 'img1', name: 'photo', mime: 'image/png' },
     { id: 'unused', name: 'old', mime: 'image/png' }
   ]
-  doc.elements = [
+  doc.pages[0].elements = [
     {
       id: 't1',
       name: 'Heading',
@@ -61,8 +61,8 @@ describe('project file', () => {
       ['unused', new Uint8Array([9])]
     ])
     const { document, assets: loaded } = decodeProject(encodeProject(doc, assets))
-    expect(document.elements).toEqual(doc.elements)
-    expect(document.background).toBe('#fafafa')
+    expect(document.pages[0].elements).toEqual(doc.pages[0].elements)
+    expect(document.pages[0].background).toBe('#fafafa')
     expect(loaded.get('img1')).toEqual(png)
   })
 
@@ -95,5 +95,35 @@ describe('project file', () => {
       'document.json': strToU8('{"schemaVersion":1,"elements":"oops"}')
     })
     expect(() => decodeProject(damaged)).toThrow(/damaged/)
+  })
+
+  it('opens version 1 projects (single page) as a one-page design', () => {
+    const v1 = {
+      schemaVersion: 1,
+      title: 'Old',
+      width: 800,
+      height: 600,
+      background: '#123456',
+      assets: [],
+      elements: [{ ...sampleDocument().pages[0].elements[0] }]
+    }
+    const file = zipSync({
+      'manifest.json': strToU8('{"format":"offline-design-editor","schemaVersion":1}'),
+      'document.json': strToU8(JSON.stringify(v1))
+    })
+    const { document } = decodeProject(file)
+    expect(document.schemaVersion).toBe(2)
+    expect(document.pages).toHaveLength(1)
+    expect(document.pages[0].background).toBe('#123456')
+    expect(document.pages[0].elements[0].id).toBe('t1')
+  })
+
+  it('keeps every page and the images used on any page', () => {
+    const doc = sampleDocument()
+    const second = { ...doc.pages[0], id: 'p2', elements: [], backgroundAssetId: 'unused' }
+    doc.pages.push(second)
+    const { document, assets } = decodeProject(encodeProject(doc, new Map([['img1', png], ['unused', png]])))
+    expect(document.pages.map((p) => p.id)).toEqual([doc.pages[0].id, 'p2'])
+    expect([...assets.keys()].sort()).toEqual(['img1', 'unused'])
   })
 })

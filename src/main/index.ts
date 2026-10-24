@@ -11,9 +11,15 @@ import {
   removeRecentFile,
   writeFileAtomic
 } from './files'
+import type { AiChatRequest, AiImageRequest, Preferences } from '@shared/ipc'
+import { activityLog, chat, generateImage, listModels, providerStates, removeProvider, saveProvider, setProviderConsent, setProviderKey, testProvider } from './ai'
 import { buildMenu } from './menu'
+import { isPhotoProvider, photoImageHosts, photoProviders, providerKey } from './photos'
+import { getPreferences, setPreferences } from './prefs'
 import { checkAccount, removeBackground } from './removeBg'
-import { getRemoveBgState, setRemoveBgConsent, setRemoveBgKey } from './secrets'
+import { getRemoveBgState, serviceState, setRemoveBgConsent, setRemoveBgKey, setSecret } from './secrets'
+import { library, recovery, saveThumbnail, templates } from './storage'
+import { testOverride } from './net'
 
 const isDev = !app.isPackaged && !!process.env['ELECTRON_RENDERER_URL']
 const projectFilter = { name: 'Design project', extensions: [PROJECT_EXTENSION] }
@@ -25,7 +31,8 @@ const exportFilters: Record<string, Electron.FileFilter> = {
   jpg: { name: 'JPEG image', extensions: ['jpg', 'jpeg'] },
   webp: { name: 'WebP image', extensions: ['webp'] },
   svg: { name: 'SVG vector image', extensions: ['svg'] },
-  pdf: { name: 'PDF document', extensions: ['pdf'] }
+  pdf: { name: 'PDF document', extensions: ['pdf'] },
+  zip: { name: 'ZIP archive (one image per page)', extensions: ['zip'] }
 }
 let lastExportFolder: string | null = null
 let pendingOpenPath: string | null = findProjectArg(process.argv)
@@ -41,8 +48,8 @@ function createWindow(): void {
     minWidth: 960,
     minHeight: 600,
     show: false,
-    backgroundColor: '#f2f3f5',
-    title: 'Offline Design Editor',
+    backgroundColor: '#f4f5f7',
+    title: 'Offline Design Studio',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
@@ -90,14 +97,29 @@ function createWindow(): void {
   }
 }
 
-/** Blocks every network request except the local dev server, so the app is offline by design. */
+/**
+ * The window itself cannot reach the internet: online services are called
+ * from this process. The one exception is photo previews from the photo
+ * providers' image servers, which their terms require apps to load directly.
+ */
 function blockNetwork(): void {
   const devUrl = process.env['ELECTRON_RENDERER_URL']
+  const testBase = testOverride('UNSPLASH_API_BASE')
+  const testHost = testBase ? new URL(testBase).host : null
   session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
     const url = details.url
     const local = url.startsWith('file:') || url.startsWith('blob:') || url.startsWith('data:') || url.startsWith('devtools:')
     const dev = isDev && devUrl && (url.startsWith(devUrl) || url.startsWith(devUrl.replace('http', 'ws')))
-    callback({ cancel: !(local || dev) })
+    let photo = false
+    if (details.resourceType === 'image') {
+      try {
+        const parsed = new URL(url)
+        photo = (parsed.protocol === 'https:' && photoImageHosts.includes(parsed.host)) || parsed.host === testHost
+      } catch {
+        photo = false
+      }
+    }
+    callback({ cancel: !(local || dev || photo) })
   })
   session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false))
 }
@@ -167,6 +189,95 @@ function registerIpc(): void {
     if (typeof path === 'string') shell.showItemInFolder(path)
   })
 
+  ipcMain.on('open-external', (_event, url: unknown) => {
+    if (typeof url === 'string' && /^https:\/\/[^\s]+$/.test(url)) void shell.openExternal(url)
+  })
+
+  // ----- Preferences -----
+
+  ipcMain.handle('prefs-get', () => getPreferences())
+  ipcMain.handle('prefs-set', (_event, patch: unknown) => {
+    if (!patch || typeof patch !== 'object') throw new Error('Invalid settings.')
+    // Provider settings change only through the AI handlers, which validate them.
+    const { aiProviders: _ignored, ...rest } = patch as Partial<Preferences>
+    return setPreferences(rest)
+  })
+
+  // ----- Photos -----
+
+  const photoStates = async () => ({ unsplash: await serviceState('photos:unsplash'), pexels: await serviceState('photos:pexels') })
+  ipcMain.handle('photos-state', () => photoStates())
+  ipcMain.handle('photos-set-key', async (_event, provider: unknown, key: unknown) => {
+    if (!isPhotoProvider(provider)) throw new Error('Unknown photo provider.')
+    const value = typeof key === 'string' ? key.trim() : ''
+    if (value && !/^[A-Za-z0-9_-]{8,200}$/.test(value)) throw new Error('That does not look like an access key.')
+    await setSecret(`photos:${provider}`, value || null)
+    return photoStates()
+  })
+  ipcMain.handle('photos-test', async (_event, provider: unknown, key: unknown) => {
+    if (!isPhotoProvider(provider)) throw new Error('Unknown photo provider.')
+    return photoProviders[provider].test(await providerKey(provider, typeof key === 'string' ? key : undefined))
+  })
+  ipcMain.handle('photos-search', async (_event, provider: unknown, query: unknown, page: unknown) => {
+    if (!isPhotoProvider(provider)) throw new Error('Unknown photo provider.')
+    const q = String(query ?? '').trim().slice(0, 200)
+    if (!q) throw new Error('Type something to search for.')
+    const p = Math.min(Math.max(1, Math.floor(Number(page) || 1)), 500)
+    return photoProviders[provider].search(await providerKey(provider), q, p)
+  })
+  ipcMain.handle('photos-download', async (_event, photo: unknown) => {
+    const p = photo as { provider?: unknown; downloadRef?: unknown; author?: unknown }
+    if (!p || !isPhotoProvider(p.provider) || typeof p.downloadRef !== 'string') throw new Error('Unknown photo.')
+    const safe = { ...(photo as object), author: String(p.author ?? '').slice(0, 200) } as Parameters<(typeof photoProviders)['unsplash']['download']>[1]
+    return photoProviders[p.provider].download(await providerKey(p.provider), safe)
+  })
+
+  // ----- AI -----
+
+  const str = (v: unknown) => (typeof v === 'string' ? v : '')
+  ipcMain.handle('ai-providers', () => providerStates())
+  ipcMain.handle('ai-save-provider', (_event, config: unknown) => saveProvider(config))
+  ipcMain.handle('ai-remove-provider', (_event, id: unknown) => removeProvider(str(id)))
+  ipcMain.handle('ai-set-key', (_event, id: unknown, key: unknown) => setProviderKey(str(id), typeof key === 'string' ? key : null))
+  ipcMain.handle('ai-set-consent', (_event, id: unknown, consent: unknown) => setProviderConsent(str(id), consent === true))
+  ipcMain.handle('ai-set-active', async (_event, id: unknown) => {
+    await setPreferences({ activeAiProvider: typeof id === 'string' ? id : null })
+  })
+  ipcMain.handle('ai-list-models', (_event, id: unknown, key: unknown) => listModels(str(id), typeof key === 'string' ? key : undefined))
+  ipcMain.handle('ai-test', (_event, id: unknown, key: unknown) => testProvider(str(id), typeof key === 'string' ? key : undefined))
+  ipcMain.handle('ai-chat', (_event, request: unknown) => chat(request as AiChatRequest))
+  ipcMain.handle('ai-generate-image', (_event, request: unknown) => generateImage(request as AiImageRequest))
+  ipcMain.handle('ai-log', () => activityLog())
+
+  // ----- Library, templates, recovery -----
+
+  ipcMain.handle('library-list', () => library.list())
+  ipcMain.handle('library-add', (_event, name: unknown, mime: unknown, bytes: unknown, width: unknown, height: unknown, thumbnail: unknown) =>
+    library.add(str(name), str(mime), bytes as Uint8Array, Number(width), Number(height), str(thumbnail))
+  )
+  ipcMain.handle('library-read', (_event, id: unknown) => library.read(id))
+  ipcMain.handle('library-remove', (_event, id: unknown) => library.remove(id))
+
+  ipcMain.handle('templates-list', () => templates.list())
+  ipcMain.handle('templates-save', (_event, title: unknown, project: unknown, info: unknown) =>
+    templates.save(str(title), project as Uint8Array, (info ?? {}) as { width: number; height: number; pages: number; thumbnail?: string })
+  )
+  ipcMain.handle('templates-read', (_event, id: unknown) => templates.read(id))
+  ipcMain.handle('templates-remove', (_event, id: unknown) => templates.remove(id))
+  ipcMain.handle('templates-import-dialog', async () => {
+    const result = await dialog.showOpenDialog(mainWindow!, { title: 'Import template', filters: [projectFilter], properties: ['openFile'] })
+    if (result.canceled || result.filePaths.length === 0) return null
+    const path = result.filePaths[0]
+    return { project: new Uint8Array(await fs.readFile(path)), name: basename(path, extname(path)) }
+  })
+
+  ipcMain.handle('recovery-write', (_event, id: unknown, title: unknown, filePath: unknown, project: unknown, thumbnail: unknown) =>
+    recovery.write(id, str(title), typeof filePath === 'string' ? filePath : null, project as Uint8Array, typeof thumbnail === 'string' ? thumbnail : undefined)
+  )
+  ipcMain.handle('recovery-list', () => recovery.list())
+  ipcMain.handle('recovery-read', (_event, id: unknown) => recovery.read(id))
+  ipcMain.handle('recovery-remove', (_event, id: unknown) => recovery.remove(id))
+
   // ----- Optional online service: remove.bg -----
 
   ipcMain.handle('remove-bg-state', () => getRemoveBgState())
@@ -194,8 +305,10 @@ function registerIpc(): void {
   })
 
   ipcMain.handle('list-recent-files', () => listRecentFiles())
-  ipcMain.handle('add-recent-file', (_event, path: unknown, title: unknown) => {
-    if (typeof path === 'string' && isProjectPath(path)) return addRecentFile(path, String(title ?? basename(path)))
+  ipcMain.handle('add-recent-file', async (_event, path: unknown, title: unknown, thumbnail: unknown) => {
+    if (typeof path !== 'string' || !isProjectPath(path)) return
+    if (thumbnail instanceof Uint8Array) await saveThumbnail(path, thumbnail).catch(() => undefined)
+    return addRecentFile(path, String(title ?? basename(path)))
   })
   ipcMain.handle('remove-recent-file', (_event, path: unknown) => {
     if (typeof path === 'string') return removeRecentFile(path)
@@ -203,7 +316,7 @@ function registerIpc(): void {
 
   ipcMain.on('document-state', (_event, state: { dirty?: unknown; title?: unknown }) => {
     documentState = { dirty: state?.dirty === true, title: String(state?.title ?? '') }
-    mainWindow?.setTitle(`${documentState.dirty ? '• ' : ''}${documentState.title || 'Untitled design'} - Offline Design Editor`)
+    mainWindow?.setTitle(`${documentState.dirty ? '• ' : ''}${documentState.title || 'Untitled design'} - Offline Design Studio`)
   })
 }
 
@@ -219,7 +332,7 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   app.whenReady().then(() => {
-    app.setAppUserModelId('com.offline-design-editor.app')
+    app.setAppUserModelId('com.offline-design-studio.app')
     blockNetwork()
     registerIpc()
     Menu.setApplicationMenu(buildMenu(() => mainWindow, isDev))

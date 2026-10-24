@@ -13,25 +13,27 @@ const text: TextElement = {
 }
 
 function doc() {
-  return { ...createDocument(1000, 1000), elements: [rect, text] }
+  const d = createDocument(1000, 1000)
+  d.pages[0].elements = [rect, text]
+  return d
 }
 
 describe('resizeDocument', () => {
   it('scales content evenly and centres it, never stretching', () => {
     const out = resizeDocument(doc(), 1920, 1080, 'scale')
-    const r = out.elements[0] as ShapeElement
+    const r = out.pages[0].elements[0] as ShapeElement
     expect(out.width).toBe(1920)
     expect(r.width / r.height).toBeCloseTo(2)
     expect(r.width).toBeCloseTo(200 * 1.08)
     expect(r.x).toBeCloseTo(100 * 1.08 + (1920 - 1080) / 2)
     expect(r.strokeWidth).toBeCloseTo(4 * 1.08)
     expect(r.rotation).toBe(30)
-    const t = out.elements[1] as TextElement
+    const t = out.pages[0].elements[1] as TextElement
     expect(t.fontSize).toBeCloseTo(40 * 1.08)
   })
 
   it('centres content without resizing it', () => {
-    const r = resizeDocument(doc(), 1200, 800, 'center').elements[0]
+    const r = resizeDocument(doc(), 1200, 800, 'center').pages[0].elements[0]
     expect(r.width).toBe(200)
     expect(r.x).toBe(200)
     expect(r.y).toBe(0)
@@ -39,7 +41,7 @@ describe('resizeDocument', () => {
 
   it('keeps content in place', () => {
     const out = resizeDocument(doc(), 500, 500, 'keep')
-    expect(out.elements[0]).toEqual(rect)
+    expect(out.pages[0].elements[0]).toEqual(rect)
   })
 })
 

@@ -19,6 +19,7 @@ import type { RecentFile, RecoveryItem, TemplateItem } from '@shared/ipc'
 import { canvasPresets } from '@shared/presets'
 import { Empty, LoadMore, Menu, NumberField, SearchInput } from './components/ui'
 import { showError } from './components/toast'
+import { useTabs } from './io/tabs'
 import { openAsNewDesign, openDesignDialog, openDesignPath, openRecovered, openUserTemplate } from './io/projectIo'
 import { builtInTemplates, searchTemplates, templateCategories, templateDocument, type BuiltInTemplate, type TemplateCategory } from './library/templates'
 import { useNearView, usePaged, useTemplateThumb } from './library/templateThumbs'
@@ -72,6 +73,9 @@ export function HomeScreen({ onCreate }: { onCreate: (width: number, height: num
   const [custom, setCustom] = useState({ width: 1080, height: 1080 })
   const [menu, setMenu] = useState<{ x: number; y: number; file: RecentFile } | null>(null)
   const version = useLibraryVersion()
+  // Unsaved work of open tabs is in the tab bar already; only older copies are offered here.
+  const tabIds = useTabs((s) => s.tabs.map((t) => t.id).join(' '))
+  const openTabIds = useMemo(() => new Set(tabIds.split(' ')), [tabIds])
 
   const loadRecent = () => window.api.listRecentFiles().then(setRecent).catch(() => setRecent([]))
   useEffect(() => {
@@ -221,7 +225,7 @@ export function HomeScreen({ onCreate }: { onCreate: (width: number, height: num
 
       <main className="home-main">
         <div className="home-inner">
-          {recovery.map((item) => (
+          {recovery.filter((item) => !openTabIds.has(item.id)).map((item) => (
             <div key={item.id} className="recovery-banner" role="alert">
               {item.thumbnail && <img src={item.thumbnail} alt="" />}
               <div className="grow">

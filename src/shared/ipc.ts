@@ -334,7 +334,16 @@ export interface EditorApi {
     list(): Promise<RecoveryItem[]>
     read(id: string): Promise<Uint8Array>
     remove(id: string): Promise<void>
+    /** Cleans up old copies; copies listed in `keep` (open tabs) stay. */
+    prune(keep: string[]): Promise<{ count: number; bytes: number }>
   }
+
+  /**
+   * Called when the window is about to close with unsaved changes. The listener
+   * keeps every open tab's work in the recovery cache and resolves to true when
+   * that worked, so the tabs come back next time; false shows the usual warning.
+   */
+  onPrepareClose(listener: () => Promise<boolean>): () => void
 
   /** Tells the main process whether there are unsaved changes, so closing the window can warn. */
   setDocumentState(state: { dirty: boolean; title: string }): void

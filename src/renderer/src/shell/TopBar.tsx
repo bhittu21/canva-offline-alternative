@@ -23,7 +23,7 @@ import {
 import type { DesignDocument } from '@shared/model'
 import { Menu, type MenuEntry } from '@renderer/components/ui'
 import { runCommand } from '@renderer/editor/commands'
-import { closeDesign, newDesign, useSaveStatus } from '@renderer/io/projectIo'
+import { closeTab, goHome, newDesign, useSaveStatus } from '@renderer/io/projectIo'
 import { editor, selectIsDirty, useEditor } from '@renderer/store/editorStore'
 import { openDialog, uiStore, usePrefs } from '@renderer/store/uiStore'
 import { BrandMark } from './BrandMark'
@@ -46,7 +46,7 @@ export function TopBar({ doc }: { doc: DesignDocument }) {
 
   let status: string
   if (save.status === 'saving') status = 'Saving…'
-  else if (dirty && save.status === 'draft') status = 'Unsaved · recovery copy kept'
+  else if (dirty && save.status === 'draft') status = 'Unsaved · kept safe in the app'
   else if (dirty) status = filePath ? 'Unsaved changes' : 'Not saved yet'
   else if (save.status === 'autosaved') status = 'All changes saved automatically'
   else status = filePath ? 'All changes saved' : 'Saved'
@@ -66,7 +66,7 @@ export function TopBar({ doc }: { doc: DesignDocument }) {
     'sep',
     { label: 'Search commands…', icon: <Search size={16} />, shortcut: 'Ctrl+K', onSelect: () => uiStore.setState({ palette: true }) },
     { label: 'Settings', icon: <Settings size={16} />, onSelect: () => openDialog('settings') },
-    { label: 'Close design', onSelect: () => void closeDesign() }
+    { label: 'Close tab', shortcut: 'Ctrl+W', onSelect: () => void closeTab() }
   ]
 
   const shareItems: (MenuEntry | 'sep')[] = [
@@ -81,7 +81,7 @@ export function TopBar({ doc }: { doc: DesignDocument }) {
 
   return (
     <header className="topbar">
-      <button className="brand" title="Home" onClick={() => void closeDesign()} data-tip="Back to home">
+      <button className="brand" title="Home" onClick={goHome} data-tip="Home (this design stays open in its tab)">
         <BrandMark />
         <span className="brand-name">Design Studio</span>
       </button>

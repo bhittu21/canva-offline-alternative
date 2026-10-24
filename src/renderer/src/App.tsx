@@ -2,13 +2,15 @@ import { useEffect } from 'react'
 import { Toasts } from './components/Toasts'
 import { Editor } from './Editor'
 import { HomeScreen } from './HomeScreen'
-import { closeDesign, duplicateDesign, importImagesDialog, newDesign, openDesignDialog, openDesignPath, saveDesign, startAutosave } from './io/projectIo'
+import { closeTab, duplicateDesign, goHome, importImagesDialog, newDesign, openDesignDialog, openDesignPath, restoreTabs, saveDesign, startAutosave } from './io/projectIo'
+import { useTabs } from './io/tabs'
+import { TabBar } from './shell/TabBar'
 import { SettingsDialog } from './dialogs/SettingsDialog'
 import { ShortcutsDialog } from './dialogs/ShortcutsDialog'
 import { CommandPalette } from './shell/CommandPalette'
 import { ConfirmHost } from './shell/ConfirmHost'
 import { loadPrefs, openDialog, uiStore, useDialog, usePrefs } from './store/uiStore'
-import { editor, editorStore, selectDocument, selectIsDirty, useEditor } from './store/editorStore'
+import { editor, editorStore, selectDocument, useEditor } from './store/editorStore'
 
 function useTheme(): void {
   const theme = usePrefs()?.theme ?? 'light'
@@ -25,7 +27,9 @@ function useTheme(): void {
 
 export function App() {
   const doc = useEditor(selectDocument)
-  const dirty = useEditor(selectIsDirty)
+  // Any tab with unsaved work counts: closing the app first keeps it in the cache.
+  const dirty = useTabs((s) => s.tabs.some((t) => t.dirty))
+  const tabId = useTabs((s) => s.activeId)
   const dialog = useDialog()
   useTheme()
 
@@ -37,12 +41,13 @@ export function App() {
   useEffect(() => {
     void loadPrefs().catch(() => undefined)
     const stopAutosave = startAutosave()
+    void restoreTabs()
     const offMenu = window.api.onMenuCommand((command) => {
       const hasDoc = !!editorStore.getState().history
       switch (command) {
         case 'new':
           openDialog(null)
-          if (hasDoc) void closeDesign()
+          goHome()
           break
         case 'open':
           void openDesignDialog()
@@ -75,7 +80,7 @@ export function App() {
           uiStore.setState({ palette: !uiStore.getState().palette })
           break
         case 'close-design':
-          if (hasDoc) void closeDesign()
+          if (hasDoc) void closeTab()
           break
       }
     })
@@ -89,7 +94,10 @@ export function App() {
 
   return (
     <>
-      {doc ? <Editor doc={doc} /> : <HomeScreen onCreate={(w, h, title) => void newDesign(w, h, title)} />}
+      <div className="app-frame">
+        <TabBar />
+        <div className="app-view">{doc ? <Editor key={tabId ?? ''} doc={doc} /> : <HomeScreen onCreate={(w, h, title) => void newDesign(w, h, title)} />}</div>
+      </div>
       {dialog === 'settings' && <SettingsDialog onClose={() => openDialog(null)} />}
       {dialog === 'shortcuts' && <ShortcutsDialog onClose={() => openDialog(null)} />}
       <CommandPalette />

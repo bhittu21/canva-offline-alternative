@@ -43,7 +43,7 @@ import {
   ZoomOut
 } from 'lucide-react'
 import type { DesignElement } from '@shared/model'
-import { closeDesign, duplicateDesign, importImageFiles, importImagesDialog, openDesignDialog, saveDesign } from '@renderer/io/projectIo'
+import { closeTab, cycleTab, goHome, duplicateDesign, importImageFiles, importImagesDialog, openDesignDialog, saveDesign } from '@renderer/io/projectIo'
 import { editor, editorStore, selectActivePage, selectedElements } from '@renderer/store/editorStore'
 import { openDialog, requestFit, uiStore, updatePrefs, type PanelId, showPanel } from '@renderer/store/uiStore'
 import { viewStore, zoomAround } from '@renderer/store/viewStore'
@@ -116,7 +116,10 @@ export const commands: Command[] = [
   { id: 'resize', label: 'Resize design…', group: 'File', icon: <Scaling size={16} />, enabled: hasDoc, run: () => openDialog('resize') },
   { id: 'import', label: 'Import images…', group: 'File', icon: <FilePlus2 size={16} />, shortcut: 'Ctrl+I', enabled: hasDoc, run: () => void importImagesDialog() },
   { id: 'save-template', label: 'Save as template…', group: 'File', icon: <FileStack size={16} />, enabled: hasDoc, run: () => openDialog('save-template') },
-  { id: 'home', label: 'Close design and go home', group: 'File', enabled: hasDoc, run: () => void closeDesign() },
+  { id: 'home', label: 'Go to home (keeps this tab open)', group: 'File', enabled: hasDoc, run: goHome },
+  { id: 'close-tab', label: 'Close tab', group: 'File', shortcut: 'Ctrl+W', enabled: hasDoc, run: () => void closeTab() },
+  { id: 'next-tab', label: 'Next tab', group: 'File', shortcut: 'Ctrl+Tab', run: () => cycleTab(1) },
+  { id: 'previous-tab', label: 'Previous tab', group: 'File', shortcut: 'Ctrl+Shift+Tab', run: () => cycleTab(-1) },
   { id: 'settings', label: 'Settings', group: 'File', icon: <Settings size={16} />, run: () => openDialog('settings') },
   { id: 'shortcuts', label: 'Keyboard shortcuts', group: 'File', icon: <Keyboard size={16} />, shortcut: '?', run: () => openDialog('shortcuts') },
 

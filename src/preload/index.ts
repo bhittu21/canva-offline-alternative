@@ -70,7 +70,18 @@ const api: EditorApi = {
     write: (id, title, filePath, project, thumbnail) => invoke('recovery-write', id, title, filePath, project, thumbnail),
     list: () => invoke('recovery-list'),
     read: (id) => invoke('recovery-read', id),
-    remove: (id) => invoke('recovery-remove', id)
+    remove: (id) => invoke('recovery-remove', id),
+    prune: (keep) => invoke('recovery-prune', keep)
+  },
+  onPrepareClose: (listener) => {
+    const handler = () => {
+      listener().then(
+        (ok) => ipcRenderer.send('close-ready', ok === true),
+        () => ipcRenderer.send('close-ready', false)
+      )
+    }
+    ipcRenderer.on('prepare-close', handler)
+    return () => ipcRenderer.removeListener('prepare-close', handler)
   },
   setDocumentState: (state) => ipcRenderer.send('document-state', state),
   onMenuCommand: (listener) => {

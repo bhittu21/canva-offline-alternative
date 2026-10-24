@@ -158,8 +158,56 @@ export const recovery = {
     const safe = checkId(id)
     await fs.rm(join(dir('recovery'), `${safe}.odesign`), { force: true })
     await fs.rm(join(dir('recovery'), `${safe}.json`), { force: true })
+  },
+
+  /**
+   * Keeps the recovery folder small. Copies of open tabs (`keep`) always stay.
+   * Others are removed when older than 30 days, when half written (a design
+   * without its details file or the other way round), or oldest first while
+   * the folder is over 1 GB. Returns what is left.
+   */
+  async prune(keep: unknown): Promise<{ count: number; bytes: number }> {
+    const keepIds = new Set(Array.isArray(keep) ? keep.filter((k): k is string => typeof k === 'string') : [])
+    const folder = dir('recovery')
+    let names: string[]
+    try {
+      names = await fs.readdir(folder)
+    } catch {
+      return { count: 0, bytes: 0 }
+    }
+    const entries = new Map<string, { bytes: number; time: number; parts: number }>()
+    for (const name of names) {
+      const match = /^(.+)\.(odesign|json)$/.exec(name)
+      if (!match) continue
+      try {
+        const info = await fs.stat(join(folder, name))
+        const e = entries.get(match[1]) ?? { bytes: 0, time: 0, parts: 0 }
+        e.bytes += info.size
+        e.time = Math.max(e.time, info.mtimeMs)
+        e.parts++
+        entries.set(match[1], e)
+      } catch {
+        // Removed meanwhile.
+      }
+    }
+    const drop = async (id: string) => {
+      await fs.rm(join(folder, `${id}.odesign`), { force: true })
+      await fs.rm(join(folder, `${id}.json`), { force: true })
+      entries.delete(id)
+    }
+    const monthAgo = Date.now() - 30 * 24 * 3600 * 1000
+    for (const [id, e] of [...entries]) {
+      if (keepIds.has(id)) continue
+      if (e.parts < 2 || e.time < monthAgo) await drop(id)
+    }
+    const total = () => [...entries.values()].reduce((sum, e) => sum + e.bytes, 0)
+    const oldest = [...entries].filter(([id]) => !keepIds.has(id)).sort((a, b) => a[1].time - b[1].time)
+    while (total() > RECOVERY_MAX_BYTES && oldest.length > 0) await drop(oldest.shift()![0])
+    return { count: entries.size, bytes: total() }
   }
 }
+
+const RECOVERY_MAX_BYTES = 1024 * 1024 * 1024
 
 // ----- Recent design thumbnails -----
 

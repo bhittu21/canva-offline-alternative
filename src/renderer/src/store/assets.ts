@@ -11,6 +11,11 @@ import type { ImageSource, RenderContext } from '@renderer/render/nodes'
  * Decoded images are cached here too, so the canvas and exports never decode
  * the same photo twice. `version` changes whenever a decode finishes, which
  * tells the canvas to redraw.
+ *
+ * Several designs can be open in tabs. Each asset remembers which tabs use it,
+ * so tabs share one copy of the same image, closing a tab frees only images no
+ * other tab needs, and designs in background tabs give back their decoded
+ * pixels (the bytes stay, and the image decodes again when the tab is shown).
  */
 
 interface StoredAsset {
@@ -29,14 +34,61 @@ export function useAssetVersion(): number {
 
 export class AssetRegistry implements RenderContext {
   private assets = new Map<string, StoredAsset>()
+  /** Tabs using each asset. Assets added outside any tab have no entry and are kept. */
+  private owners = new Map<string, Set<string>>()
+  private owner: string | null = null
 
-  add(bytes: Uint8Array, mime: string, id: string = nanoid()): string {
+  /** The tab that new assets belong to. */
+  setOwner(tabId: string | null): void {
+    this.owner = tabId
+  }
+
+  add(bytes: Uint8Array, mime: string, id: string = nanoid(), owner: string | null = this.owner): string {
     const existing = this.assets.get(id)
+    if (owner) {
+      if (!this.owners.has(id)) this.owners.set(id, new Set())
+      this.owners.get(id)!.add(owner)
+    }
+    // The same image opened in a second tab reuses the first copy.
+    if (existing && existing.mime === mime && existing.bytes.length === bytes.length) return id
     if (existing) URL.revokeObjectURL(existing.url)
     const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: mime }))
     this.assets.set(id, { bytes, mime, url })
-    void this.load(id).catch(() => {})
+    if (!owner || owner === this.owner) void this.load(id).catch(() => {})
     return id
+  }
+
+  /** Forgets a closed tab and frees the images that no open tab uses any more. */
+  release(tabId: string): void {
+    for (const [id, set] of this.owners) {
+      if (!set.delete(tabId) || set.size > 0) continue
+      this.owners.delete(id)
+      const asset = this.assets.get(id)
+      if (asset) URL.revokeObjectURL(asset.url)
+      this.assets.delete(id)
+    }
+  }
+
+  /** Drops decoded pixels of images used only by background tabs. */
+  trimDecoded(activeTabId: string | null): void {
+    for (const [id, set] of this.owners) {
+      if (activeTabId && set.has(activeTabId)) continue
+      const asset = this.assets.get(id)
+      if (asset?.decoded) {
+        asset.decoded = undefined
+        asset.loading = undefined
+      }
+    }
+  }
+
+  /** Images of one tab, for saving it while another tab is shown. */
+  bytesMapFor(tabId: string): Map<string, Uint8Array> {
+    const map = new Map<string, Uint8Array>()
+    for (const [id, asset] of this.assets) {
+      const set = this.owners.get(id)
+      if (!set || set.has(tabId)) map.set(id, asset.bytes)
+    }
+    return map
   }
 
   has(id: string): boolean {
@@ -87,6 +139,7 @@ export class AssetRegistry implements RenderContext {
   clear(): void {
     for (const asset of this.assets.values()) URL.revokeObjectURL(asset.url)
     this.assets.clear()
+    this.owners.clear()
   }
 }
 

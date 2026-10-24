@@ -75,18 +75,40 @@ function createWindow(): void {
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
   window.webContents.on('will-navigate', (event) => event.preventDefault())
 
+  // Unsaved work in tabs is first kept in the recovery cache, so it reopens next
+  // time. Only when that fails (or the page does not answer) does closing warn.
+  let closeAllowed = false
+  let closeAsked = false
   window.on('close', (event) => {
-    if (!documentState.dirty) return
-    const choice = dialog.showMessageBoxSync(window, {
-      type: 'warning',
-      buttons: ['Close without saving', 'Cancel'],
-      defaultId: 1,
-      cancelId: 1,
-      title: 'Unsaved changes',
-      message: `"${documentState.title || 'Untitled design'}" has unsaved changes.`,
-      detail: 'If you close now, your latest changes will be lost.'
-    })
-    if (choice === 1) event.preventDefault()
+    if (closeAllowed || !documentState.dirty) return
+    event.preventDefault()
+    if (closeAsked) return
+    closeAsked = true
+    const finish = (kept: boolean) => {
+      clearTimeout(timer)
+      ipcMain.removeListener('close-ready', onReady)
+      closeAsked = false
+      if (!kept) {
+        const choice = dialog.showMessageBoxSync(window, {
+          type: 'warning',
+          buttons: ['Close without saving', 'Cancel'],
+          defaultId: 1,
+          cancelId: 1,
+          title: 'Unsaved changes',
+          message: `"${documentState.title || 'Untitled design'}" has unsaved changes.`,
+          detail: 'If you close now, your latest changes will be lost.'
+        })
+        if (choice === 1) return
+      }
+      closeAllowed = true
+      window.close()
+    }
+    const onReady = (e: Electron.IpcMainEvent, kept: unknown) => {
+      if (e.sender === window.webContents) finish(kept === true)
+    }
+    const timer = setTimeout(() => finish(false), 8000)
+    ipcMain.on('close-ready', onReady)
+    window.webContents.send('prepare-close')
   })
   window.on('closed', () => {
     mainWindow = null
@@ -298,6 +320,7 @@ function registerIpc(): void {
   ipcMain.handle('recovery-list', () => recovery.list())
   ipcMain.handle('recovery-read', (_event, id: unknown) => recovery.read(id))
   ipcMain.handle('recovery-remove', (_event, id: unknown) => recovery.remove(id))
+  ipcMain.handle('recovery-prune', (_event, keep: unknown) => recovery.prune(keep))
 
   // ----- Optional online service: remove.bg -----
 
@@ -337,7 +360,7 @@ function registerIpc(): void {
 
   ipcMain.on('document-state', (_event, state: { dirty?: unknown; title?: unknown }) => {
     documentState = { dirty: state?.dirty === true, title: String(state?.title ?? '') }
-    mainWindow?.setTitle(`${documentState.dirty ? '• ' : ''}${documentState.title || 'Untitled design'} - Design Studio`)
+    mainWindow?.setTitle(documentState.title ? `${documentState.dirty ? '• ' : ''}${documentState.title} - Design Studio` : 'Design Studio')
   })
 }
 

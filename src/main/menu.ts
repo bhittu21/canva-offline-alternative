@@ -22,7 +22,7 @@ export function buildMenu(getWindow: () => BrowserWindow | null, isDev: boolean)
         { type: 'separator' },
         { label: 'Settings...', click: send('settings') },
         { type: 'separator' },
-        { label: 'Close design', click: send('close-design') },
+        { label: 'Close tab', accelerator: 'CmdOrCtrl+W', click: send('close-design') },
         { role: 'quit', label: 'Exit' }
       ]
     },

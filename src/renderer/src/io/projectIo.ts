@@ -9,11 +9,12 @@ import { showError, showToast } from '@renderer/components/toast'
 import { centerAt, createImage } from '@renderer/editor/elementFactory'
 import { canvasToBlob, renderThumbnail, thumbnailPng } from '@renderer/export/renderDesign'
 import { assets } from '@renderer/store/assets'
-import { editor, editorStore, selectActivePage, selectIsDirty } from '@renderer/store/editorStore'
+import { editor, editorStore, selectActivePage, selectIsDirty, type EditorState } from '@renderer/store/editorStore'
+import { activeTabId, findTab, putTab, readTabSession, removeTab, saveTabSession, startTabSync, tabsStore, updateTab, type DesignTab } from './tabs'
 import { bumpLibrary } from '@renderer/store/libraryStore'
 import { confirmAction, uiStore } from '@renderer/store/uiStore'
 
-// ---------------------------------------------------------------- Save status
+// ---------------------------------------------------------------- Save status (of the shown tab)
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'autosaved' | 'draft' | 'error'
 
@@ -23,12 +24,19 @@ export function useSaveStatus() {
   return useStore(statusStore, (s) => s)
 }
 
-/** Identifies the open design's crash-recovery copy. */
-let sessionId = nanoid(12)
+// ---------------------------------------------------------------- Tabs, open and close
 
-// ---------------------------------------------------------------- Open and close
+type AssetBytes = Map<string, { bytes: Uint8Array; mime: string }>
 
-/** Asks before throwing away unsaved work. Resolves to true when it is fine to continue. */
+function assetBytesOf(project: { document: DesignDocument; assets: Map<string, Uint8Array> }): AssetBytes {
+  const map: AssetBytes = new Map()
+  for (const [id, bytes] of project.assets) {
+    map.set(id, { bytes, mime: project.document.assets.find((a) => a.id === id)?.mime ?? 'application/octet-stream' })
+  }
+  return map
+}
+
+/** Asks before throwing away the shown tab's unsaved work. Resolves to true when it is fine to continue. */
 export async function confirmDiscardChanges(): Promise<boolean> {
   if (!selectIsDirty(editorStore.getState())) return true
   const title = editorStore.getState().history?.present.title || 'Untitled design'
@@ -43,52 +51,140 @@ export async function confirmDiscardChanges(): Promise<boolean> {
   return true
 }
 
-function startSession(id = nanoid(12)): void {
-  sessionId = id
+/**
+ * Puts the shown tab in the background: its editor state is kept with the tab
+ * and, when it has unsaved changes, written to the recovery cache.
+ */
+function stashActiveTab(): void {
+  const id = activeTabId()
+  if (autosaveTimer) clearTimeout(autosaveTimer)
+  autosaveTimer = null
+  if (!id || !findTab(id)) return
+  const state: EditorState = { ...editorStore.getState(), editingTextId: null }
+  const dirty = selectIsDirty(state)
+  updateTab(id, { state, dirty, filePath: state.filePath, title: state.history?.present.title ?? findTab(id)!.title })
+  // No tab is shown until the next one is, so the editor's changes meanwhile belong to none.
+  tabsStore.setState({ activeId: null })
+  if (dirty) void keepRecoveryCopy(id, state)
+}
+
+function showTabState(id: string | null, state: EditorState | null): void {
+  assets.setOwner(id)
+  tabsStore.setState({ activeId: id })
+  if (state) editorStore.setState(state, true)
+  else editor.close()
+  uiStore.setState({ contextMenu: null })
   statusStore.setState({ status: 'idle', at: null })
+  scheduleTrim()
 }
 
-function finishSession(): void {
-  void window.api.recovery.remove(sessionId).catch(() => undefined)
-}
-
-export async function openDocument(doc: DesignDocument, filePath: string | null, recoveryId?: string): Promise<void> {
+/** Opens a document in a new tab (or in the tab with `id`, which then reloads). */
+export async function openDocument(
+  doc: DesignDocument,
+  filePath: string | null,
+  options: { id?: string; dirty?: boolean; assets?: AssetBytes } = {}
+): Promise<string> {
+  stashActiveTab()
+  const id = options.id ?? nanoid(12)
+  assets.setOwner(id)
+  for (const [assetId, a] of options.assets ?? []) assets.add(a.bytes, a.mime, assetId, id)
   editor.open(doc, filePath)
-  startSession(recoveryId)
+  if (options.dirty) editorStore.setState({ forceDirty: true })
+  putTab({ id, title: doc.title, filePath, dirty: selectIsDirty(editorStore.getState()), state: null })
+  showTabState(id, editorStore.getState())
   uiStore.setState({ panel: doc.pages.some((p) => p.elements.length > 0) ? 'elements' : 'design', panelOpen: true })
+  return id
+}
+
+/** Shows another tab, loading it first when it was restored after a restart. */
+export async function switchTab(id: string): Promise<void> {
+  const tab = findTab(id)
+  if (!tab || id === activeTabId()) return
+  if (tab.pending) {
+    await loadRestoredTab(tab)
+    return
+  }
+  stashActiveTab()
+  const state = tab.state
+  updateTab(id, { state: null })
+  showTabState(id, state)
+}
+
+/** Steps to the next (1) or previous (-1) tab. */
+export function cycleTab(step: 1 | -1): void {
+  const { tabs, activeId } = tabsStore.getState()
+  if (tabs.length === 0) return
+  const at = tabs.findIndex((t) => t.id === activeId)
+  const next = at < 0 ? (step > 0 ? 0 : tabs.length - 1) : (at + step + tabs.length) % tabs.length
+  void switchTab(tabs[next].id)
+}
+
+/** Shows the home screen. Open tabs stay open. */
+export function goHome(): void {
+  if (!activeTabId()) return
+  stashActiveTab()
+  showTabState(null, null)
+}
+
+/** Closes a tab (the shown one by default), asking first when it has unsaved changes. */
+export async function closeTab(id: string | null = activeTabId()): Promise<boolean> {
+  if (!id) return true
+  const tab = findTab(id)
+  if (!tab) return true
+  if (id !== activeTabId()) {
+    if (!tab.dirty) {
+      discardTab(id)
+      return true
+    }
+    // Show it, so the question and a possible save are about the right design.
+    await switchTab(id)
+    if (activeTabId() !== id) return false
+  }
+  if (!(await confirmDiscardChanges())) return false
+  const { tabs } = tabsStore.getState()
+  const at = tabs.findIndex((t) => t.id === id)
+  const neighbour = tabs[at + 1] ?? tabs[at - 1]
+  tabsStore.setState({ activeId: null })
+  editor.close()
+  discardTab(id)
+  if (neighbour) await switchTab(neighbour.id)
+  else showTabState(null, null)
+  return true
+}
+
+function discardTab(id: string): void {
+  removeTab(id)
+  finishSession(id)
+  assets.release(id)
+}
+
+/** Closes every tab, asking about each one with unsaved changes. */
+export async function closeAllTabs(): Promise<void> {
+  for (const tab of [...tabsStore.getState().tabs].reverse()) {
+    if (!(await closeTab(tab.id))) return
+  }
+}
+
+/** The tab that already shows this file, if any. */
+function tabWithFile(path: string) {
+  const key = path.toLowerCase()
+  return tabsStore.getState().tabs.find((t) => t.filePath?.toLowerCase() === key)
 }
 
 export async function newDesign(width: number, height: number, title?: string): Promise<void> {
-  if (!(await confirmDiscardChanges())) return
-  finishSession()
-  assets.clear()
   await openDocument(createDocument(width, height, title), null)
 }
 
-/** Opens a ready-made document (for example a template) as a new, unsaved design. */
-export async function openAsNewDesign(doc: DesignDocument, assetBytes?: Map<string, { bytes: Uint8Array; mime: string }>): Promise<void> {
-  if (!(await confirmDiscardChanges())) return
-  finishSession()
-  assets.clear()
-  for (const [id, a] of assetBytes ?? []) assets.add(a.bytes, a.mime, id)
-  await openDocument(doc, null)
-  editorStore.setState({ forceDirty: true })
+/** Opens a ready-made document (for example a template) as a new, unsaved design in its own tab. */
+export async function openAsNewDesign(doc: DesignDocument, assetBytes?: AssetBytes): Promise<void> {
+  await openDocument(doc, null, { dirty: true, assets: assetBytes })
 }
 
 export async function closeDesign(): Promise<void> {
-  if (!(await confirmDiscardChanges())) return
-  finishSession()
-  assets.clear()
-  editor.close()
+  await closeTab()
 }
 
 // ---------------------------------------------------------------- Save
-
-async function encodeCurrent(withThumbnail: boolean): Promise<Uint8Array> {
-  const doc = editorStore.getState().history!.present
-  const thumbnail = withThumbnail ? await thumbnailPng(doc, 480) : undefined
-  return encodeProject(doc, assets.bytesMap(), thumbnail)
-}
 
 let saving: Promise<boolean> | null = null
 
@@ -97,6 +193,7 @@ export async function saveDesign(saveAs = false, options: { quiet?: boolean } = 
   const run = (async () => {
     const state = editorStore.getState()
     const doc = state.history?.present
+    const tabId = activeTabId()
     if (!doc) return false
     try {
       let path = saveAs ? null : state.filePath
@@ -111,12 +208,19 @@ export async function saveDesign(saveAs = false, options: { quiet?: boolean } = 
       const current = savedHistory!.present
       const thumbnail = await thumbnailPng(current, 480)
       await window.api.writeProject(path, encodeProject(current, assets.bytesMap(), thumbnail))
-      // Only mark saved if nothing changed while writing.
-      if (editorStore.getState().history?.present === current) editor.markSaved(path)
-      else editorStore.setState({ filePath: path })
+      // Only mark saved if nothing changed while writing. The tab may have gone
+      // to the background meanwhile, so the mark goes to its kept state then.
+      const saved = (s: EditorState): Partial<EditorState> =>
+        s.history?.present === current ? { filePath: path, savedEntry: s.history.past[s.history.past.length - 1] ?? null, forceDirty: false } : { filePath: path }
+      const kept = tabId ? findTab(tabId) : undefined
+      if (activeTabId() === tabId) editorStore.setState(saved(editorStore.getState()))
+      else if (kept?.state) {
+        const state = { ...kept.state, ...saved(kept.state) }
+        updateTab(kept.id, { state, filePath: path, dirty: selectIsDirty(state) })
+      }
       await window.api.addRecentFile(path, current.title, thumbnail)
-      finishSession()
-      statusStore.setState({ status: options.quiet ? 'autosaved' : 'saved', at: Date.now() })
+      finishSession(tabId)
+      if (activeTabId() === tabId) statusStore.setState({ status: options.quiet ? 'autosaved' : 'saved', at: Date.now() })
       if (!options.quiet) showToast('Saved')
       return true
     } catch (error) {
@@ -142,33 +246,45 @@ export async function duplicateDesign(): Promise<void> {
   if (!ok) editor.setTitleSilently(doc.title)
 }
 
-// ---------------------------------------------------------------- Autosave and recovery
+// ---------------------------------------------------------------- Autosave and the recovery cache
 
 let autosaveTimer: ReturnType<typeof setTimeout> | null = null
 let lastPresent: DesignDocument | null = null
 
 /**
- * Watches the open design. A design that already has a file is saved to it a
+ * Watches the shown design. A design that already has a file is saved to it a
  * few seconds after each change (when autosave is on). Every design with
- * unsaved changes also gets a recovery copy in the app's data folder, so a
- * crash or power cut never loses more than a few seconds of work.
+ * unsaved changes also gets a copy in the recovery cache, so a crash, a power
+ * cut or closing the app never loses more than a few seconds of work, and the
+ * tabs open again next time.
  */
 export function startAutosave(): () => void {
-  return editorStore.subscribe((state) => {
+  const offTabs = startTabSync()
+  const offEditor = editorStore.subscribe((state) => {
     const present = state.history?.present ?? null
     if (present === lastPresent) return
     lastPresent = present
     if (autosaveTimer) clearTimeout(autosaveTimer)
+    autosaveTimer = null
     if (!present || !selectIsDirty(state)) return
     statusStore.setState({ status: 'idle' })
     autosaveTimer = setTimeout(() => void autosaveNow(), 2500)
   })
+  const offClose = window.api.onPrepareClose(keepAllTabs)
+  return () => {
+    offTabs()
+    offEditor()
+    offClose()
+  }
 }
 
 async function autosaveNow(): Promise<void> {
+  autosaveTimer = null
   const state = editorStore.getState()
-  if (!state.history || !selectIsDirty(state) || editorStore.getState().editingTextId) {
-    if (editorStore.getState().editingTextId) autosaveTimer = setTimeout(() => void autosaveNow(), 2500)
+  const id = activeTabId()
+  if (!id || !state.history || !selectIsDirty(state)) return
+  if (state.editingTextId) {
+    autosaveTimer = setTimeout(() => void autosaveNow(), 2500)
     return
   }
   const prefs = uiStore.getState().prefs
@@ -176,29 +292,128 @@ async function autosaveNow(): Promise<void> {
     await saveDesign(false, { quiet: true })
     return
   }
+  if ((await keepRecoveryCopy(id, state)) && activeTabId() === id) statusStore.setState({ status: 'draft', at: Date.now() })
+}
+
+/** What each tab last wrote to the cache, so unchanged designs are never written twice. */
+const written = new Map<string, DesignDocument>()
+/** Cache previews are redrawn at most every 30 seconds per tab. */
+const previews = new Map<string, { at: number; doc: DesignDocument; url: string }>()
+/** Writes and removals for one tab run in order, so an old copy never lands after a newer one. */
+const queues = new Map<string, Promise<unknown>>()
+
+function queue<T>(id: string, task: () => Promise<T>): Promise<T> {
+  const run = (queues.get(id) ?? Promise.resolve()).then(task, task)
+  const tail = run.catch(() => undefined)
+  queues.set(id, tail)
+  void tail.then(() => queues.get(id) === tail && queues.delete(id))
+  return run
+}
+
+/** Writes a tab's unsaved work to the recovery cache. Resolves to false if that failed. */
+function keepRecoveryCopy(id: string, state: EditorState): Promise<boolean> {
+  return queue(id, async () => {
+    const doc = state.history?.present
+    if (!doc) return true
+    if (written.get(id) === doc) return true
+    try {
+      let preview = previews.get(id)
+      if (!preview || (preview.doc !== doc && Date.now() - preview.at > 30_000)) {
+        // A small JPEG: the preview only helps recognise the design in the recovery list.
+        const canvas = await renderThumbnail(doc, doc.pages[0], 200)
+        preview = { at: Date.now(), doc, url: canvas.toDataURL('image/jpeg', 0.8) }
+        previews.set(id, preview)
+      }
+      await window.api.recovery.write(id, doc.title, state.filePath, encodeProject(doc, assets.bytesMapFor(id)), preview.url)
+      written.set(id, doc)
+      return true
+    } catch {
+      // The cache is a safety net; a failure here must never interrupt editing.
+      return false
+    }
+  })
+}
+
+/** The tab's work is in a file (or was discarded): its cache copy goes. */
+function finishSession(id: string | null = activeTabId()): void {
+  if (!id) return
+  written.delete(id)
+  previews.delete(id)
+  void queue(id, () => window.api.recovery.remove(id)).catch(() => undefined)
+}
+
+/** Before the window closes: every tab with unsaved work is put in the cache. */
+export async function keepAllTabs(): Promise<boolean> {
+  const id = activeTabId()
+  if (autosaveTimer) clearTimeout(autosaveTimer)
+  autosaveTimer = null
+  const jobs: Promise<boolean>[] = []
+  const state = editorStore.getState()
+  if (id && state.history && selectIsDirty(state)) jobs.push(keepRecoveryCopy(id, state))
+  for (const tab of tabsStore.getState().tabs) {
+    if (tab.id !== id && tab.dirty && tab.state) jobs.push(keepRecoveryCopy(tab.id, tab.state))
+  }
+  const results = await Promise.all(jobs)
+  saveTabSession()
+  return results.every(Boolean)
+}
+
+let trimTimer: ReturnType<typeof setTimeout> | null = null
+
+/** A little after switching tabs, background designs give back their decoded images. */
+function scheduleTrim(): void {
+  if (trimTimer) clearTimeout(trimTimer)
+  trimTimer = setTimeout(() => {
+    trimTimer = null
+    if (queues.size > 0) scheduleTrim()
+    else assets.trimDecoded(activeTabId())
+  }, 5000)
+}
+
+/** Reopens the tabs that were open when the app was last closed. */
+export async function restoreTabs(): Promise<void> {
+  const session = readTabSession()
+  let cached = new Set<string>()
   try {
-    const doc = state.history.present
-    const thumb = await renderThumbnail(doc, doc.pages[0], 200)
-    const thumbnail = thumb.toDataURL('image/png')
-    await window.api.recovery.write(sessionId, doc.title, state.filePath, await encodeCurrent(false), thumbnail)
-    statusStore.setState({ status: 'draft', at: Date.now() })
+    cached = new Set((await window.api.recovery.list()).map((r) => r.id))
   } catch {
-    // Recovery copies are a safety net; a failure here must never interrupt editing.
+    // Without the cache list, only tabs with files can come back.
+  }
+  const tabs: DesignTab[] = (session?.tabs ?? [])
+    .filter((t) => cached.has(t.id) || t.filePath)
+    .map((t) => ({ ...t, dirty: cached.has(t.id), state: null, pending: cached.has(t.id) ? 'recovery' : 'file' }))
+  if (tabs.length > 0) tabsStore.setState({ tabs })
+  void window.api.recovery.prune(tabs.map((t) => t.id)).catch(() => undefined)
+  const active = tabs.find((t) => t.id === session?.active)
+  if (active) await switchTab(active.id)
+}
+
+/** Loads a tab that was restored after a restart, the first time it is shown. */
+async function loadRestoredTab(tab: DesignTab): Promise<void> {
+  try {
+    if (tab.pending === 'recovery') {
+      const project = decodeProject(await window.api.recovery.read(tab.id))
+      await openDocument(project.document, tab.filePath, { id: tab.id, dirty: true, assets: assetBytesOf(project) })
+      written.set(tab.id, project.document)
+    } else if (tab.filePath) {
+      const file = await window.api.openProjectPath(tab.filePath)
+      const project = decodeProject(file.bytes)
+      await openDocument(project.document, file.path, { id: tab.id, assets: assetBytesOf(project) })
+      editor.markSaved(file.path)
+    }
+  } catch (error) {
+    showError(error, `"${tab.title || 'Untitled design'}" could not be reopened.`)
+    removeTab(tab.id)
+    assets.release(tab.id)
   }
 }
 
 export async function openRecovered(id: string, filePath: string | null): Promise<void> {
-  if (!(await confirmDiscardChanges())) return
+  if (findTab(id)) return switchTab(id)
   try {
     const project = decodeProject(await window.api.recovery.read(id))
-    finishSession()
-    assets.clear()
-    for (const [assetId, data] of project.assets) {
-      const info = project.document.assets.find((a) => a.id === assetId)
-      assets.add(data, info?.mime ?? 'application/octet-stream', assetId)
-    }
-    await openDocument(project.document, filePath, id)
-    editorStore.setState({ forceDirty: true })
+    await openDocument(project.document, filePath, { id, dirty: true, assets: assetBytesOf(project) })
+    written.set(id, project.document)
     showToast('Recovered your unsaved design. Save it to keep it.')
   } catch (error) {
     showError(error, 'The recovered design could not be opened.')
@@ -208,7 +423,6 @@ export async function openRecovered(id: string, filePath: string | null): Promis
 // ---------------------------------------------------------------- Open files
 
 export async function openDesignDialog(): Promise<void> {
-  if (!(await confirmDiscardChanges())) return
   try {
     const file = await window.api.openProjectDialog()
     if (file) await loadProjectBytes(file.path, file.bytes)
@@ -218,7 +432,8 @@ export async function openDesignDialog(): Promise<void> {
 }
 
 export async function openDesignPath(path: string): Promise<void> {
-  if (!(await confirmDiscardChanges())) return
+  const open = tabWithFile(path)
+  if (open) return switchTab(open.id)
   try {
     const file = await window.api.openProjectPath(path)
     await loadProjectBytes(file.path, file.bytes)
@@ -228,14 +443,14 @@ export async function openDesignPath(path: string): Promise<void> {
 }
 
 async function loadProjectBytes(path: string, bytes: Uint8Array): Promise<void> {
-  const project = decodeProject(bytes)
-  finishSession()
-  assets.clear()
-  for (const [id, data] of project.assets) {
-    const info = project.document.assets.find((a) => a.id === id)
-    assets.add(data, info?.mime ?? 'application/octet-stream', id)
+  const open = tabWithFile(path)
+  if (open) {
+    await switchTab(open.id)
+    showToast('That design is already open in a tab.')
+    return
   }
-  await openDocument(project.document, path)
+  const project = decodeProject(bytes)
+  await openDocument(project.document, path, { assets: assetBytesOf(project) })
   editor.markSaved(path)
   void window.api.addRecentFile(path, project.document.title)
 }

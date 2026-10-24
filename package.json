@@ -1,8 +1,10 @@
 {
   "name": "offline-design-editor",
-  "version": "0.1.0",
+  "productName": "Offline Design Studio",
+  "version": "1.0.0",
   "private": true,
-  "description": "Offline, Canva-inspired desktop design editor for Windows",
+  "description": "Offline, Canva-inspired desktop design studio for Windows",
+  "author": "Abir",
   "main": "out/main/index.js",
   "scripts": {
     "dev": "install-electron && electron-vite dev",
@@ -10,29 +12,99 @@
     "start": "install-electron && electron-vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "test": "vitest run",
-    "postinstall": "install-electron"
-  },
-  "dependencies": {
-    "fflate": "^0.8.3",
-    "immer": "^11.2.9",
-    "konva": "^10.9.0",
-    "nanoid": "^5.1.16",
-    "pdf-lib": "^1.17.1",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "react-konva": "^19.3.2",
-    "zod": "^4.6.7",
-    "zustand": "^5.0.16"
+    "postinstall": "install-electron",
+    "dist": "npm run build && electron-builder --win --x64 --publish never"
   },
   "devDependencies": {
+    "@fontsource/abril-fatface": "^5.3.0",
+    "@fontsource/anton": "^5.3.0",
+    "@fontsource/archivo-black": "^5.3.0",
+    "@fontsource/bebas-neue": "^5.3.0",
+    "@fontsource/caveat": "^5.3.0",
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/dancing-script": "^5.3.0",
+    "@fontsource/dm-serif-display": "^5.3.0",
+    "@fontsource/great-vibes": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/josefin-sans": "^5.3.0",
+    "@fontsource/libre-baskerville": "^5.3.0",
+    "@fontsource/lobster": "^5.3.0",
+    "@fontsource/lora": "^5.3.0",
+    "@fontsource/merriweather": "^5.3.0",
+    "@fontsource/montserrat": "^5.3.0",
+    "@fontsource/nunito": "^5.3.0",
+    "@fontsource/oswald": "^5.3.0",
+    "@fontsource/pacifico": "^5.3.0",
+    "@fontsource/playfair-display": "^5.3.0",
+    "@fontsource/poppins": "^5.3.0",
+    "@fontsource/quicksand": "^5.3.0",
+    "@fontsource/raleway": "^5.3.0",
+    "@fontsource/roboto-slab": "^5.3.0",
+    "@fontsource/space-grotesk": "^5.3.0",
+    "@fontsource/work-sans": "^5.3.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.1.0",
     "electron": "^44.9.3",
+    "electron-builder": "^26.18.0",
     "electron-vite": "^5.0.0",
+    "fflate": "^0.8.3",
+    "immer": "^11.2.9",
+    "konva": "^10.9.0",
+    "lucide": "^1.61.0",
+    "lucide-react": "^1.61.0",
+    "lucide-static": "^1.61.0",
+    "nanoid": "^5.1.16",
+    "pdf-lib": "^1.17.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-konva": "^19.3.2",
     "typescript": "~5.9.3",
     "vite": "^7.3.7",
-    "vitest": "^4.1.12"
+    "vitest": "^4.1.12",
+    "zod": "^4.6.7",
+    "zustand": "^5.0.16"
+  },
+  "build": {
+    "appId": "com.offline-design-studio.app",
+    "productName": "Offline Design Studio",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Offline Design Studio",
+      "artifactName": "Offline-Design-Studio-Setup-${version}.${ext}",
+      "deleteAppDataOnUninstall": false
+    },
+    "fileAssociations": [
+      {
+        "ext": "odesign",
+        "name": "Design Studio project",
+        "description": "Offline Design Studio design",
+        "role": "Editor"
+      }
+    ]
   }
 }

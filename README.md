@@ -249,7 +249,7 @@ existing design. Older single-page files are upgraded when opened.
 
 ### Publishing a new version
 
-Raise `version` in `package.json` and push a tag like `v1.0.1`. The **Release** workflow builds the installer on GitHub's Windows servers and publishes it as the latest release, so the download link above always points to the newest version.
+Raise `version` in `package.json`, then push a tag like `v1.0.1` or run the **Release** workflow from the Actions tab. It builds the installer on GitHub's Windows servers and publishes it as the latest release, so the download link above always points to the newest version.
 
 </details>
 

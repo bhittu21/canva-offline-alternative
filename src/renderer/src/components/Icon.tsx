@@ -20,7 +20,9 @@ const paths = {
   home: 'M3 11l9-8 9 8M5 9v11h14V9',
   save: 'M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6',
   folder: 'M3 6h6l2 2h10v11H3z',
-  plus: 'M12 5v14M5 12h14'
+  plus: 'M12 5v14M5 12h14',
+  export: 'M12 15V3M7 8l5-5 5 5M4 14v6h16v-6',
+  resize: 'M4 9V4h5M20 15v5h-5M4 4l7 7M20 20l-7-7'
 } as const
 
 export type IconName = keyof typeof paths

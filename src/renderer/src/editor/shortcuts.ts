@@ -34,7 +34,7 @@ function nudge(dx: number, dy: number): void {
 export function useEditorShortcuts(): void {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (isTyping(event.target)) return
+      if (isTyping(event.target) || document.querySelector('.modal')) return
       const ctrl = event.ctrlKey || event.metaKey
       const key = event.key.toLowerCase()
 
@@ -66,7 +66,7 @@ export function useEditorShortcuts(): void {
 
     // Pasting: images from the system clipboard first, otherwise elements copied in the app.
     const onPaste = (event: ClipboardEvent) => {
-      if (isTyping(event.target) || !editorStore.getState().history) return
+      if (isTyping(event.target) || document.querySelector('.modal') || !editorStore.getState().history) return
       const files = [...(event.clipboardData?.files ?? [])].filter((f) => f.type.startsWith('image/'))
       event.preventDefault()
       if (files.length > 0) {

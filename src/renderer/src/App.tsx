@@ -3,6 +3,7 @@ import { Toasts } from './components/Toasts'
 import { Editor } from './Editor'
 import { HomeScreen } from './HomeScreen'
 import { closeDesign, importImagesDialog, newDesign, openDesignDialog, openDesignPath, saveDesign } from './io/projectIo'
+import { openDialog } from './store/uiStore'
 import { editor, editorStore, selectDocument, selectIsDirty, useEditor } from './store/editorStore'
 
 export function App() {
@@ -19,6 +20,7 @@ export function App() {
       const hasDoc = !!editorStore.getState().history
       switch (command) {
         case 'new':
+          openDialog(null)
           if (hasDoc) closeDesign()
           break
         case 'open':
@@ -38,6 +40,9 @@ export function App() {
           break
         case 'redo':
           editor.redo()
+          break
+        case 'export':
+          if (hasDoc) openDialog('export')
           break
         case 'close-design':
           if (hasDoc) closeDesign()

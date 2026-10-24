@@ -26,6 +26,7 @@ export type MenuCommand =
   | 'redo'
   | 'import-image'
   | 'close-design'
+  | 'export'
 
 export interface EditorApi {
   /** Shows the Open dialog. Resolves to null when cancelled. */
@@ -38,6 +39,10 @@ export interface EditorApi {
   writeProject(path: string, bytes: Uint8Array): Promise<void>
   /** Shows the image picker and returns the chosen files' bytes. */
   importImagesDialog(): Promise<ImportedImage[]>
+  /** Shows a Save dialog for an export and writes the file. Resolves to the saved path, or null when cancelled. */
+  saveExport(bytes: Uint8Array, suggestedName: string, extension: string): Promise<string | null>
+  /** Opens the folder containing a file in Windows Explorer, with the file selected. */
+  showInFolder(path: string): void
   listRecentFiles(): Promise<RecentFile[]>
   addRecentFile(path: string, title: string): Promise<void>
   removeRecentFile(path: string): Promise<void>

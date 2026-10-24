@@ -1,5 +1,5 @@
 import { promises as fs } from 'node:fs'
-import { basename, join } from 'node:path'
+import { basename, dirname, extname, join } from 'node:path'
 import { app, BrowserWindow, dialog, ipcMain, Menu, session, shell } from 'electron'
 import { PROJECT_EXTENSION } from '@shared/constants'
 import {
@@ -18,6 +18,14 @@ const projectFilter = { name: 'Design project', extensions: [PROJECT_EXTENSION] 
 
 let mainWindow: BrowserWindow | null = null
 let documentState = { dirty: false, title: '' }
+const exportFilters: Record<string, Electron.FileFilter> = {
+  png: { name: 'PNG image', extensions: ['png'] },
+  jpg: { name: 'JPEG image', extensions: ['jpg', 'jpeg'] },
+  webp: { name: 'WebP image', extensions: ['webp'] },
+  svg: { name: 'SVG vector image', extensions: ['svg'] },
+  pdf: { name: 'PDF document', extensions: ['pdf'] }
+}
+let lastExportFolder: string | null = null
 let pendingOpenPath: string | null = findProjectArg(process.argv)
 
 function findProjectArg(argv: string[]): string | null {
@@ -134,6 +142,27 @@ function registerIpc(): void {
     })
     if (result.canceled) return []
     return Promise.all(result.filePaths.map(readImage))
+  })
+
+  ipcMain.handle('save-export', async (_event, bytes: unknown, suggestedName: unknown, extension: unknown) => {
+    const filter = exportFilters[String(extension)]
+    if (!filter) throw new Error('Unsupported export format.')
+    if (!(bytes instanceof Uint8Array)) throw new Error('Nothing to export.')
+    const name = String(suggestedName || `Design.${extension}`).replace(/[<>:"/\\|?*]+/g, ' ')
+    const result = await dialog.showSaveDialog(mainWindow!, {
+      title: 'Export design',
+      defaultPath: join(lastExportFolder ?? app.getPath('pictures'), name),
+      filters: [filter]
+    })
+    if (result.canceled || !result.filePath) return null
+    const path = extname(result.filePath).toLowerCase() === `.${extension}` ? result.filePath : `${result.filePath}.${extension}`
+    await writeFileAtomic(path, bytes)
+    lastExportFolder = dirname(path)
+    return path
+  })
+
+  ipcMain.on('show-in-folder', (_event, path: unknown) => {
+    if (typeof path === 'string') shell.showItemInFolder(path)
   })
 
   ipcMain.handle('list-recent-files', () => listRecentFiles())

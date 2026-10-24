@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import type { DesignDocument } from '@shared/model'
 import { Icon, type IconName } from './components/Icon'
+import { ExportDialog } from './dialogs/ExportDialog'
+import { ResizeDialog } from './dialogs/ResizeDialog'
 import { CanvasArea } from './editor/CanvasArea'
 import { useEditorShortcuts } from './editor/shortcuts'
 import { closeDesign, saveDesign } from './io/projectIo'
@@ -10,6 +12,7 @@ import { PropertiesPanel } from './panels/PropertiesPanel'
 import { TextPanel } from './panels/TextPanel'
 import { UploadsPanel } from './panels/UploadsPanel'
 import { editor, selectIsDirty, useEditor } from './store/editorStore'
+import { openDialog, useDialog } from './store/uiStore'
 
 type Tab = 'text' | 'elements' | 'uploads' | 'layers'
 
@@ -25,6 +28,7 @@ export function Editor({ doc }: { doc: DesignDocument }) {
   const canUndo = useEditor((s) => (s.history?.past.length ?? 0) > 0)
   const canRedo = useEditor((s) => (s.history?.future.length ?? 0) > 0)
   const dirty = useEditor(selectIsDirty)
+  const dialog = useDialog()
   useEditorShortcuts()
 
   return (
@@ -59,8 +63,14 @@ export function Editor({ doc }: { doc: DesignDocument }) {
             {doc.width} × {doc.height} px{dirty ? ' · Unsaved changes' : ' · Saved'}
           </span>
         </div>
-        <button className="button primary" title="Save (Ctrl+S)" onClick={() => void saveDesign(false)}>
+        <button className="button ghost" title="Change the design size" onClick={() => openDialog('resize')}>
+          <Icon name="resize" size={18} /> Resize
+        </button>
+        <button className="button ghost" title="Save (Ctrl+S)" onClick={() => void saveDesign(false)}>
           <Icon name="save" size={18} /> Save
+        </button>
+        <button className="button primary" title="Export (Ctrl+E)" onClick={() => openDialog('export')}>
+          <Icon name="export" size={18} /> Export
         </button>
       </header>
 
@@ -87,6 +97,9 @@ export function Editor({ doc }: { doc: DesignDocument }) {
       <aside className="properties">
         <PropertiesPanel doc={doc} />
       </aside>
+
+      {dialog === 'export' && <ExportDialog doc={doc} onClose={() => openDialog(null)} />}
+      {dialog === 'resize' && <ResizeDialog doc={doc} onClose={() => openDialog(null)} />}
     </div>
   )
 }

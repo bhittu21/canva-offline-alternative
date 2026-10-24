@@ -5,6 +5,7 @@ import { rotatedBounds } from '@renderer/editor/geometry'
 import { duplicateSelection } from '@renderer/editor/shortcuts'
 import { withTextHeight } from '@renderer/editor/textMeasure'
 import { editor, useEditor } from '@renderer/store/editorStore'
+import { openDialog } from '@renderer/store/uiStore'
 
 /** Fonts that ship with every Windows 10 and 11 PC, so designs look the same offline. */
 const fonts = [
@@ -65,6 +66,9 @@ function PageProperties({ doc }: { doc: DesignDocument }) {
           onChange={(v) => editor.change('Resize page', (d) => void (d.height = Math.round(v)), { mergeKey: 'page-height' })}
         />
       </div>
+      <button className="button wide" onClick={() => openDialog('resize')}>
+        Resize design…
+      </button>
       <ColorField
         label="Background"
         value={doc.background}

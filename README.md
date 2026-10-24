@@ -12,8 +12,11 @@ account, no login, no cloud: your designs are saved as files on your own PC.
 - Edit text directly on the page; change font, size, colour, bold, italic, underline, alignment, spacing
 - Undo and redo every change; layers panel to reorder, rename, hide and lock elements
 - Save designs as `.odesign` files and reopen them, including from a Recent designs list
+- Export to PNG, JPG, WebP, SVG and PDF at any size, with aspect-ratio presets, a ratio lock,
+  fit-or-fill for different shapes (never stretched), quality and transparent backgrounds
+- Resize a design (or create a resized copy) while scaling, centring or keeping its content
 
-Export to PNG, JPEG and PDF, and the Windows installer, are the next steps.
+See [docs/ROADMAP.md](docs/ROADMAP.md) for everything that is planned, and what works offline.
 
 ## Run it on Windows (first time)
 
@@ -50,6 +53,7 @@ npm run dev
 | Save / Save as | Ctrl+S / Ctrl+Shift+S |
 | Open | Ctrl+O |
 | Import image | Ctrl+I |
+| Export | Ctrl+E |
 | Duplicate | Ctrl+D |
 | Copy / Paste elements | Ctrl+C / Ctrl+V |
 | Delete | Delete or Backspace |

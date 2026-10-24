@@ -39,6 +39,7 @@ import { Section, ToggleButton, updater } from './common'
 import { TextSections } from './TextSections'
 import { ImageSections } from './ImageSections'
 import { IconSection, LineSection, ShadowSection, ShapeSection } from './StyleSections'
+import { PanelResizer } from '@renderer/shell/PanelResizer'
 import { ChartSections, TableSections } from './DataSections'
 
 const typeInfo: Record<DesignElement['type'], { label: string; icon: ReactNode }> = {
@@ -79,6 +80,7 @@ export function Inspector({ doc, page }: { doc: DesignDocument; page: Page }) {
 
   return (
     <aside className="inspector" aria-label="Properties">
+      <PanelResizer cssVar="--inspector-w" edge="left" min={240} max={520} label="Resize properties panel" />
       <header className="inspector-head">
         <span className="type-icon">{icon}</span>
         <h2>{title}</h2>

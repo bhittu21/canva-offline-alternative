@@ -4,7 +4,10 @@ import { App } from './App'
 import { loadFonts } from './fonts/fontList'
 import { clearThumbCache } from './library/thumbnails'
 import { uiStore } from './store/uiStore'
+import { restorePanelWidths } from './shell/PanelResizer'
 import './styles.css'
+
+restorePanelWidths()
 
 // Text is measured with the real fonts, so measure again once they are ready.
 void loadFonts().finally(() => {

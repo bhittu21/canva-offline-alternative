@@ -2898,3 +2898,62 @@ h3,
   display: flex;
   margin: 16px auto 4px;
 }
+
+/* ----- Resizable side panels ----- */
+
+.side-panel,
+.inspector {
+  position: relative;
+}
+
+.panel-resizer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  z-index: 20;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.panel-resizer.right {
+  right: -4px;
+}
+
+.panel-resizer.left {
+  left: -1px;
+}
+
+.panel-resizer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  background: transparent;
+  transition: background 0.12s var(--ease);
+}
+
+.panel-resizer.left::after {
+  left: 0;
+}
+
+.panel-resizer:hover::after,
+.panel-resizer:focus-visible::after,
+.resizing-panel .panel-resizer::after {
+  background: var(--accent);
+}
+
+.panel-resizer:focus-visible {
+  outline: none;
+}
+
+body.resizing-panel {
+  cursor: col-resize;
+  user-select: none;
+}
+
+body.resizing-panel .side-panel {
+  transition: none;
+}

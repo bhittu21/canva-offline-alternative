@@ -20,6 +20,7 @@ import { handleKeyDown, handlePaste } from './editor/commands'
 import { ContextMenu } from './shell/ContextMenu'
 import { TopBar } from './shell/TopBar'
 import { BottomBar } from './shell/BottomBar'
+import { PanelResizer } from './shell/PanelResizer'
 import { Inspector } from './inspector/Inspector'
 import { DesignPanel } from './panels/DesignPanel'
 import { ElementsPanel } from './panels/ElementsPanel'
@@ -127,6 +128,7 @@ export function Editor({ doc }: { doc: DesignDocument }) {
 
       <aside className={`side-panel${panelOpen ? '' : ' closed'}`} aria-label="Side panel">
         {panelOpen && <PanelContent panel={panel} doc={doc} />}
+        {panelOpen && <PanelResizer cssVar="--panel-w" edge="right" min={260} max={620} label="Resize side panel" />}
       </aside>
 
       <main className="workspace">

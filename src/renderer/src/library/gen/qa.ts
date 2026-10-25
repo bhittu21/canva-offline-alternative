@@ -4,7 +4,7 @@ import { designDocumentSchema } from '@shared/model'
 import { decodeProject, encodeProject } from '@shared/projectFile'
 import { renderThumbnail } from '@renderer/export/renderDesign'
 import { fontInfo } from '@renderer/fonts/fontList'
-import { openDocument } from '@renderer/io/projectIo'
+import { closeTab, openDocument } from '@renderer/io/projectIo'
 import { iconList } from '@renderer/render/icons'
 import { tableLayout, tableWordsFit } from '@renderer/render/layouts'
 import { measureTextHeight } from '@renderer/render/text'
@@ -40,6 +40,9 @@ const overlap = (a: DesignElement, b: DesignElement) => {
   const h = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y)
   return w > 2 && h > 2 ? w * h : 0
 }
+
+/** Meme-style text with a thick outline reads on any photo or colour. */
+const outlined = (el: TextElement) => !!el.strokeColor && (el.strokeWidth ?? 0) >= el.fontSize * 0.05
 
 /** The colour behind the middle of a text element. */
 function colourUnder(page: DesignDocument['pages'][number], index: number, el: TextElement, stop: string): RGBA {
@@ -146,7 +149,7 @@ export function check(id: string): CheckResult {
         const h = measureTextHeight(el)
         if (Math.abs(h - el.height) > 2) issues.push(`${name}: height ${Math.round(el.height)} but text needs ${Math.round(h)}`)
         if (el.fontSize < minFont) issues.push(`${name}: font ${Math.round(el.fontSize)}px is too small (min ${Math.round(minFont)})`)
-        for (const stop of stops) {
+        for (const stop of outlined(el) ? [] : stops) {
           const under = colourUnder(page, i, el, stop)
           const fg = parseColor(el.fill)
           if (!fg) continue
@@ -158,7 +161,7 @@ export function check(id: string): CheckResult {
           if (j <= i && other.type === 'text') return
           if (other === el || other.hidden) return
           if (other.type === 'text' && overlap(el, other) > 0) issues.push(`${name}: overlaps text "${other.name.slice(0, 24)}"`)
-          if (other.type === 'image' && j < i && overlap(el, other) > el.width * el.height * 0.05 && !el.background && !shieldedFrom(page, j, i, el)) issues.push(`${name}: sits on photo frame`)
+          if (other.type === 'image' && j < i && overlap(el, other) > el.width * el.height * 0.05 && !el.background && !outlined(el) && !shieldedFrom(page, j, i, el)) issues.push(`${name}: sits on photo frame`)
           if (other.type === 'image' && j > i && overlap(el, other) > el.width * el.height * 0.05) issues.push(`${name}: hidden under photo frame`)
           if (j > i && other.type === 'shape' && other.name !== 'Decoration' && other.fill !== 'transparent' && overlap(el, other) > el.width * el.height * 0.3) issues.push(`${name}: covered by ${other.name}`)
         })
@@ -180,14 +183,24 @@ export async function openInEditor(id: string): Promise<string[]> {
   const doc = templateDocument(find(id))
   await openDocument(doc, null)
   const issues: string[] = []
+  const close = () => {
+    // Each check opens a tab; mark it unchanged and close it so tabs do not pile up.
+    const h = editorStore.getState().history
+    if (h) editorStore.setState({ forceDirty: false, savedEntry: h.past[h.past.length - 1] ?? null })
+    return closeTab()
+  }
   for (const page of doc.pages) {
     editor.setActivePage(editorStore.getState().history!.present.pages[doc.pages.indexOf(page)].id)
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
     const stage = Konva.stages.find((s) => s.container().closest('.canvas-area'))
-    if (!stage) return ['no canvas']
+    if (!stage) {
+      await close()
+      return ['no canvas']
+    }
     const present = editorStore.getState().history!.present.pages[doc.pages.indexOf(page)]
     const missing = present.elements.filter((el) => !stage.findOne(`#${el.id}`))
     if (missing.length) issues.push(`${missing.length} of ${present.elements.length} elements not drawn on page ${doc.pages.indexOf(page) + 1}`)
   }
+  await close()
   return issues
 }

@@ -22,7 +22,7 @@ export interface BuiltInTemplate {
   pageCount?: number
 }
 
-export type TemplateCategory = 'social' | 'stories' | 'presentations' | 'video' | 'print' | 'cards' | 'business' | 'documents' | 'planners' | 'education'
+export type TemplateCategory = 'social' | 'stories' | 'presentations' | 'video' | 'print' | 'cards' | 'business' | 'documents' | 'planners' | 'education' | 'memes'
 
 export const templateCategories: { id: TemplateCategory; label: string }[] = [
   { id: 'social', label: 'Social posts' },
@@ -34,7 +34,8 @@ export const templateCategories: { id: TemplateCategory; label: string }[] = [
   { id: 'business', label: 'Business' },
   { id: 'documents', label: 'Documents' },
   { id: 'planners', label: 'Planners and calendars' },
-  { id: 'education', label: 'Education' }
+  { id: 'education', label: 'Education' },
+  { id: 'memes', label: 'Memes' }
 ]
 
 const INK = '#1f2329'

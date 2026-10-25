@@ -5,7 +5,7 @@ The first public release of Design Studio, a free design app for Windows that wo
 **Download:** `Design-Studio-Setup.exe` below. Double-click it to install. No account and no administrator rights needed.
 
 ### What's inside
-- 1,190 ready-made templates: social posts, stories, presentations, posters, menus, résumés, certificates, calendars, worksheets and more. Every one is fully editable.
+- 1,408 ready-made templates: social posts, stories, presentations, posters, menus, résumés, certificates, calendars, worksheets, 218 memes and more. Every one is fully editable.
 - Text, shapes, lines, about 1,900 icons, frames, charts and tables.
 - Several designs open at once in tabs. Unsaved work is kept safe and comes back after you close the app.
 - Your own fonts: fonts installed on Windows show up, and you can add .ttf, .otf, .woff or .woff2 files.

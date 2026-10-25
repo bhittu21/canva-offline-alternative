@@ -14,6 +14,8 @@ import { type Deck, buildDeck, decks } from './docs/slides'
 import { type Menu, buildMenu, menuLayoutIds, menus } from './docs/menus'
 import { type Letter, type OfficeDoc, buildLetter, buildOfficeDoc, letters, officeDocs, signs } from './docs/letters'
 import { promos } from './content/promo'
+import { memeLayouts, type MemeLayoutId } from './memeLayouts'
+import { alignMemes, brainMemes, buttonMemes, captionMemes, chartMemes, choiceMemes, classicMemes, comicMemes, labelMemes, nobodyMemes, postMemes, signMemes, starterMemes, tierMemes, vennMemes, versusMemes } from './content/memes'
 import { announcements, business, events, greetings, quotes } from './content/social'
 
 /**
@@ -91,6 +93,29 @@ const bills: Bill[] = billKinds.flatMap((doc, i) =>
     return { id: `${doc.kind.toLowerCase().replace(/\s+/g, '-')}-${company.id}`, title: `${doc.kind} · ${company.title}`, kw: `${doc.kind.toLowerCase()} ${company.kw}`, mood: company.mood, doc, company }
   })
 )
+
+/** One meme format: every item uses the same layout, in one size. */
+const meme = <C extends Item>(id: string, label: string, items: C[], layout: MemeLayoutId, formats: FormatId[] = ['post']): Family =>
+  family<C>({ id: `meme-${id}`, label, items, layouts: [layout], formats, perItem: 1, category: 'memes', keywords: `meme memes funny humor ${label.toLowerCase()}`, fits: () => true, build: single(memeLayouts) })
+
+const memeFamilies: Family[] = [
+  meme('classic', 'Top and bottom text', classicMemes, 'classic', ['post', 'portrait']),
+  meme('caption', 'Caption over photo', captionMemes, 'caption', ['portrait', 'post']),
+  meme('choice', 'Two choices', choiceMemes, 'choice'),
+  meme('brain', 'Expanding brain', brainMemes, 'brain', ['portrait']),
+  meme('nobody', 'Nobody / me', nobodyMemes, 'nobody'),
+  meme('post', 'Text post', postMemes, 'post'),
+  meme('versus', 'Versus', versusMemes, 'versus'),
+  meme('labels', 'Labelled photo', labelMemes, 'labels'),
+  meme('starter', 'Starter pack', starterMemes, 'starter'),
+  meme('tier', 'Tier list', tierMemes, 'tier', ['portrait']),
+  meme('align', 'Alignment chart', alignMemes, 'align'),
+  meme('sign', 'Sign holder', signMemes, 'sign'),
+  meme('buttons', 'Two buttons', buttonMemes, 'buttons', ['portrait']),
+  meme('chart', 'Funny chart', chartMemes, 'chart'),
+  meme('venn', 'Venn diagram', vennMemes, 'venn'),
+  meme('comic', 'Four panel comic', comicMemes, 'comic')
+]
 
 const families: Family[] = [
   post({
@@ -367,7 +392,8 @@ const families: Family[] = [
     fits: () => true,
     build: (layout, item, f, theme, seed) => buildCalendar(Number(layout), item, f.width, f.height, theme, seed),
     pages: (item) => (item.month === 'all' ? 12 : 1)
-  })
+  }),
+  ...memeFamilies
 ]
 
 function generate(): GeneratedTemplate[] {

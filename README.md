@@ -20,7 +20,7 @@
 
 </div>
 
-**Design Studio is a free graphic design app for Windows 10 and 11 that works completely offline.** It is built for people who like easy, drag-and-drop design tools such as Canva but want their work to stay on their own computer. It comes with **1,190 ready-made templates**, every one of them fully editable. There is no login and nothing is uploaded. Designs are saved as files on your PC. AI tools are there if you want them, using a free AI that runs on your PC or your own API key.
+**Design Studio is a free graphic design app for Windows 10 and 11 that works completely offline.** It is built for people who like easy, drag-and-drop design tools such as Canva but want their work to stay on their own computer. It comes with **1,408 ready-made templates**, every one of them fully editable. There is no login and nothing is uploaded. Designs are saved as files on your PC. AI tools are there if you want them, using a free AI that runs on your PC or your own API key.
 
 ## Download and install (2 minutes)
 
@@ -39,7 +39,7 @@ That's it. No sign-up, no email, no credit card.
 | 🔒 **100% private** | Your designs never leave your PC unless you choose an online feature and say yes. |
 | ✈️ **Works offline** | Design on a plane, in a classroom or anywhere without Wi-Fi. |
 | 🙅 **No login** | No account, no subscription, no ads, no watermark. |
-| 🎨 **1,190 templates** | Social posts, stories, slides, posters, menus, résumés, certificates, calendars and more. |
+| 🎨 **1,408 templates** | Social posts, stories, slides, posters, menus, résumés, certificates, calendars, 218 memes and more. |
 | ✏️ **Everything is editable** | Change any text, colour, font, photo, shape or layout. |
 | 🗂️ **Tabs** | Work on several designs at once, like tabs in a web browser. |
 | 💾 **Never lose work** | Unsaved work is kept safe and comes back after you close the app, even after a crash. |
@@ -53,8 +53,10 @@ Pick a size (Instagram post, story, YouTube thumbnail, A4, presentation, poster,
 
 <img src="docs/images/screenshots/01-home.png" alt="Design Studio home screen in dark mode with quick-start sizes, blank designs and template search" width="100%" />
 
-### 1,190 ready-made templates
+### 1,408 ready-made templates
 Every template is original and was checked to make sure all its text and shapes can be edited. Categories include social media posts, Instagram and Facebook stories, YouTube thumbnails and banners, flyers and posters, invitations and cards, business cards, letterheads, invoices, certificates, résumés and cover letters, planners, calendars, worksheets, presentations, menus and price lists.
+
+**New: 218 meme templates.** Classic top and bottom text, POV captions, two choices, expanding brain, starter packs, tier lists, alignment charts, Venn diagrams, funny charts, four-panel comics and more. All captions are original, and the photo spots are empty frames: drop in your own picture and the meme is ready.
 
 <img src="docs/images/screenshots/02-templates.png" alt="Template gallery with categories such as social posts, presentations, business, documents, planners and education" width="100%" />
 

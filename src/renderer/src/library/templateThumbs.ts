@@ -2,6 +2,7 @@ import { type RefObject, useEffect, useState } from 'react'
 import { renderThumbnail } from '@renderer/export/renderDesign'
 import { loadFonts } from '@renderer/fonts/fontList'
 import { templateDocument, type BuiltInTemplate } from './templates'
+import { hasRealPictures, memeRenderContext, useRealMemesOn, withRealPictures } from './realMemes'
 
 /** Recently drawn previews; the oldest are dropped so a long scroll does not hold every image. */
 const cache = new Map<string, string>()
@@ -18,8 +19,12 @@ function remember(key: string, url: string): void {
  * background, only once the card is on screen, then cached.
  */
 export function useTemplateThumb(template: BuiltInTemplate, max = 240, visible = true): string | null {
-  const key = `${template.id}@${max}`
-  const [url, setUrl] = useState(() => cache.get(key) ?? null)
+  const real = useRealMemesOn() && hasRealPictures(template)
+  const key = `${template.id}@${max}${real ? '@real' : ''}`
+  // The preview belongs to one key: when real meme pictures are turned on or off, the old preview is dropped.
+  const [shown, setShown] = useState(() => ({ key, url: cache.get(key) ?? null }))
+  const url = shown.key === key ? shown.url : (cache.get(key) ?? null)
+  const setUrl = (u: string) => setShown({ key, url: u })
   useEffect(() => {
     if (url || !visible) return
     let cancelled = false
@@ -30,8 +35,9 @@ export function useTemplateThumb(template: BuiltInTemplate, max = 240, visible =
       try {
         // Templates measure their text, so the fonts must be ready first.
         await loadFonts()
-        const doc = templateDocument(template)
-        const canvas = await renderThumbnail(doc, doc.pages[0], max)
+        let doc = templateDocument(template)
+        if (real) doc = (await withRealPictures(doc)).doc
+        const canvas = await renderThumbnail(doc, doc.pages[0], max, real ? memeRenderContext : undefined)
         const data = canvas.toDataURL('image/png')
         remember(key, data)
         if (!cancelled) setUrl(data)

@@ -24,6 +24,8 @@ import { openAsNewDesign, openDesignDialog, openDesignPath, openRecovered, openU
 import { builtInTemplates, searchTemplates, templateCategories, templateDocument, type BuiltInTemplate, type TemplateCategory } from './library/templates'
 import { useNearView, usePaged, useTemplateThumb } from './library/templateThumbs'
 import { loadFonts } from './fonts/fontList'
+import { PopularMemes } from './PopularMemes'
+import { hasRealPictures, realMemesOn, withRealPictures } from './library/realMemes'
 import { BrandMark } from './shell/BrandMark'
 import { timeAgo } from './panels/ProjectsPanel'
 import { bumpLibrary, useLibraryVersion } from './store/libraryStore'
@@ -48,7 +50,11 @@ function TemplateCard({ template }: { template: BuiltInTemplate }) {
   const url = useTemplateThumb(template, 320, useNearView(ref))
   const open = async () => {
     await loadFonts()
-    await openAsNewDesign(templateDocument(template))
+    const doc = templateDocument(template)
+    if (hasRealPictures(template) && realMemesOn()) {
+      const real = await withRealPictures(doc)
+      await openAsNewDesign(real.doc, real.bytes)
+    } else await openAsNewDesign(doc)
   }
   return (
     <button ref={ref} className="design-card" onClick={() => void open()} title={`Start from “${template.title}”`}>
@@ -163,6 +169,7 @@ export function HomeScreen({ onCreate }: { onCreate: (width: number, height: num
           ))}
         </div>
       )}
+      {view === 'templates' && category === 'memes' && <PopularMemes query={query} />}
       {templates.length === 0 ? (
         <Empty icon={<LayoutTemplate size={28} />} title="No templates match">
           Try another word, or start with a blank design above.

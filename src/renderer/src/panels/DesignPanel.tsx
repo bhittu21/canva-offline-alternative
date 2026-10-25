@@ -8,6 +8,8 @@ import { addTemplatePages, loadUserTemplate } from '@renderer/io/projectIo'
 import { builtInTemplates, searchTemplates, templateCategories, templateDocument, type BuiltInTemplate, type TemplateCategory } from '@renderer/library/templates'
 import { useNearView, usePaged, useTemplateThumb } from '@renderer/library/templateThumbs'
 import { loadFonts } from '@renderer/fonts/fontList'
+import { hasRealPictures, realMemesOn, withRealPictures } from '@renderer/library/realMemes'
+import { assets } from '@renderer/store/assets'
 import { editorStore, selectActivePage } from '@renderer/store/editorStore'
 import { bumpLibrary, useLibraryVersion } from '@renderer/store/libraryStore'
 import { confirmAction, openDialog, uiStore, updatePrefs, usePrefs } from '@renderer/store/uiStore'
@@ -48,7 +50,13 @@ function BuiltInCard({ template }: { template: BuiltInTemplate }) {
   const url = useTemplateThumb(template, 240, useNearView(ref))
   const use = async () => {
     await loadFonts()
-    await applyTemplate(templateDocument(template), `builtin:${template.id}`)
+    let doc = templateDocument(template)
+    if (hasRealPictures(template) && realMemesOn()) {
+      const real = await withRealPictures(doc)
+      for (const [id, a] of real.bytes) assets.add(a.bytes, a.mime, id)
+      doc = real.doc
+    }
+    await applyTemplate(doc, `builtin:${template.id}`)
   }
   return (
     <button ref={ref} className="thumb-card" title={template.title} onClick={() => void use()}>

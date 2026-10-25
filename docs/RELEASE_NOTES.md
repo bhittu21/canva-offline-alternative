@@ -1,4 +1,13 @@
-## Design Studio 1.1.0
+## Design Studio 1.2.0
+
+**New: real meme pictures (optional).** In Templates → Memes, turn on *Real meme pictures* to fetch the classic meme photos from the free memegen.link service:
+- The 218 meme templates switch from drawings to real photos: Drake, Galaxy brain, Distracted boyfriend, Change my mind, Two buttons, Success kid, This is fine and more.
+- A new *Popular memes* gallery lists about 200 memegen templates. Click one and type your captions; every caption is editable text.
+- It is off until you turn it on. Only the meme's name is sent, never your designs or words, and pictures are saved on your PC so they work offline afterwards.
+
+Also: a fresher look for the drawn meme pictures.
+
+### Earlier in 1.1.0
 
 **New: 218 meme templates** in a new Memes category: classic top and bottom text, POV captions, two choices, expanding brain, starter packs, tier lists, alignment charts, Venn diagrams, funny charts, four-panel comics and more. Each one has an original cartoon reaction picture that fits the joke. Every word and picture can be changed.
 

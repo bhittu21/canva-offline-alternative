@@ -3145,3 +3145,14 @@ body.resizing-panel .side-panel {
 :root[data-theme='dark'] .tile.tile-art:hover {
   background: #f4f5f9;
 }
+
+/* ----- Real meme pictures ----- */
+
+.meme-optin {
+  margin-bottom: 18px;
+}
+
+.popular-memes .home-section-head {
+  gap: 12px;
+  flex-wrap: wrap;
+}

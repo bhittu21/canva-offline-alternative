@@ -59,6 +59,8 @@ Every template is original and was checked to make sure all its text and shapes 
 ### 218 meme templates
 Classic top and bottom text, POV captions, two choices, expanding brain, nobody / me, starter packs, tier lists, alignment charts, Venn diagrams, funny charts, four-panel comics and more. Every meme comes with an original cartoon reaction picture that matches the joke, and all the words are original. Change the caption, or delete the picture and drop in your own photo.
 
+**Want the real meme photos?** Turn on *Real meme pictures* in the Memes gallery. The app then fetches the classic pictures (Drake, This is fine, Galaxy brain, Distracted boyfriend, Change my mind, Success kid and 200 more) from the free [memegen.link](https://memegen.link) service: the templates switch to the real photos and a *Popular memes* gallery opens with editable captions. It is off until you turn it on, only the meme's name is sent, and pictures are saved on your PC so they work offline afterwards.
+
 <img src="docs/images/screenshots/18-memes.png" alt="Meme templates in Design Studio with cartoon reaction faces, cats and dogs" width="100%" />
 
 <img src="docs/images/screenshots/02-templates.png" alt="Template gallery with categories such as social posts, presentations, business, documents, planners and education" width="100%" />
@@ -120,6 +122,7 @@ Design Studio works fully without the internet. These extras are **optional** an
 | AI image generation | Providers that offer image models | Your own API key |
 | Stock photo search | Unsplash, Pexels | A free API key |
 | Remove image background | remove.bg | Your remove.bg key |
+| Real meme pictures | memegen.link | Nothing, it is free (turn it on in the Memes gallery) |
 
 <img src="docs/images/screenshots/15-settings-ai.png" alt="AI provider settings where you add a local model or your own API key" width="100%" />
 
@@ -253,6 +256,7 @@ existing design. Older single-page files are upgraded when opened.
 - Fonts: [Fontsource](https://fontsource.org) packages of Google Fonts (SIL Open Font Licence)
 - Templates, text combinations and element shapes: original to this project
 - Stock photos are not bundled; they are fetched on demand under the Unsplash or Pexels licence
+- Real meme pictures are not bundled; when turned on they are fetched from memegen.link and belong to their owners
 
 ### Publishing a new version
 

@@ -15,6 +15,7 @@ export const defaultPreferences: Preferences = {
   recentColors: [],
   brand: { name: 'My brand', colors: ['#1f2329', '#7c5cff', '#ff6b6b', '#ffd166', '#f7f4ee'], headingFont: 'Poppins', bodyFont: 'Inter', logos: [] },
   photoProvider: 'unsplash',
+  memesOnline: false,
   aiProviders: [],
   activeAiProvider: null
 }
@@ -71,6 +72,7 @@ function sanitize(raw: unknown): Preferences {
       logos: strings(brand.logos, 24)
     },
     photoProvider: p.photoProvider === 'pexels' ? 'pexels' : 'unsplash',
+    memesOnline: p.memesOnline === true,
     aiProviders: Array.isArray(p.aiProviders) ? p.aiProviders.map(sanitizeProvider).filter((x): x is AiProviderConfig => !!x).slice(0, 20) : [],
     activeAiProvider: typeof p.activeAiProvider === 'string' ? p.activeAiProvider : null
   }

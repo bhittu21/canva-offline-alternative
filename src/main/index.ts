@@ -15,6 +15,7 @@ import type { AiChatRequest, AiImageRequest, Preferences } from '@shared/ipc'
 import { activityLog, chat, generateImage, listModels, providerStates, removeProvider, saveProvider, setProviderConsent, setProviderKey, testProvider } from './ai'
 import { buildMenu } from './menu'
 import { isPhotoProvider, photoImageHosts, photoProviders, providerKey } from './photos'
+import { clearMemeCache, isMemeId, listMemeTemplates, memeImage } from './memes'
 import { getPreferences, setPreferences } from './prefs'
 import { checkAccount, removeBackground } from './removeBg'
 import { getRemoveBgState, serviceState, setRemoveBgConsent, setRemoveBgKey, setSecret } from './secrets'
@@ -228,6 +229,15 @@ function registerIpc(): void {
     const { aiProviders: _ignored, ...rest } = patch as Partial<Preferences>
     return setPreferences(rest)
   })
+
+  // ----- Real meme pictures -----
+
+  ipcMain.handle('memes-list', () => listMemeTemplates())
+  ipcMain.handle('memes-image', (_event, id: unknown) => {
+    if (!isMemeId(id)) throw new Error('Unknown meme.')
+    return memeImage(id)
+  })
+  ipcMain.handle('memes-clear-cache', () => clearMemeCache())
 
   // ----- Photos -----
 

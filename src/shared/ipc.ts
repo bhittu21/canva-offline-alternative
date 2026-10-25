@@ -36,6 +36,24 @@ export interface RemoveBgResult {
   creditsCharged: number | null
 }
 
+// ----- Real meme pictures (memegen.link) -----
+
+export interface MemeTemplateInfo {
+  id: string
+  name: string
+  /** How many captions the meme has. */
+  lines: number
+  keywords: string[]
+  /** Where the meme is explained (usually Know Your Meme). */
+  source: string | null
+}
+
+export interface MemeImage {
+  id: string
+  bytes: Uint8Array
+  mime: string
+}
+
 // ----- Photos -----
 
 export type PhotoProviderId = 'unsplash' | 'pexels'
@@ -189,6 +207,8 @@ export interface Preferences {
   recentColors: string[]
   brand: BrandKit
   photoProvider: PhotoProviderId
+  /** Real meme pictures from memegen.link (off until the person turns it on). */
+  memesOnline: boolean
   aiProviders: AiProviderConfig[]
   activeAiProvider: string | null
 }
@@ -273,6 +293,13 @@ export interface EditorApi {
     /** Checks a key (the given one, or the saved one) without using credits. */
     check(key?: string): Promise<RemoveBgAccount>
     run(bytes: Uint8Array, mime: string): Promise<RemoveBgResult>
+  }
+
+  /** Optional online service: real meme pictures from memegen.link. Works only while turned on in preferences. */
+  memes: {
+    list(): Promise<MemeTemplateInfo[]>
+    image(id: string): Promise<MemeImage>
+    clearCache(): Promise<void>
   }
 
   photos: {

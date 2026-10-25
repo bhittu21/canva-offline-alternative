@@ -1,6 +1,6 @@
 import type { TextElement } from '@shared/model'
 import { chart, ellipse, icon, rect } from '../templateKit'
-import { type Face, OUTLINE, artFor, backdrop, character, propBadge, scene, skinOf } from './memeArt'
+import { type Face, OUTLINE, artFor, backdrop, character, memeFor, picture, propBadge, scene, skinOf } from './memeArt'
 import { type Box, type Ctx, E, P, S, T, cols, r, rows, stack, textEl, textIn, textWidth } from './core'
 import type {
   AlignMeme,
@@ -76,7 +76,8 @@ function flankedTitle(c: Ctx, value: string, b: Box, faces: [Face, Face], about:
 
 const classic = (c: Ctx, p: ClassicMeme) => {
   background(c, INK)
-  c.els.push(...scene({ x: 0, y: 0, w: c.W, h: c.H }, artFor(p.bottom, `${p.top} ${p.topic}`, { propFrom: `${p.top} ${p.bottom}` }), { size: 0.5 }))
+  const art = artFor(p.bottom, `${p.top} ${p.topic}`, { propFrom: `${p.top} ${p.bottom}` })
+  c.els.push(...scene({ x: 0, y: 0, w: c.W, h: c.H }, art, { size: 0.5, meme: { id: memeFor(art, `${p.top} ${p.bottom}`) } }))
   const m = c.u * 3.5
   const h = c.H * 0.27
   memeText(c, p.top, { x: m, y: m, w: c.W - m * 2, h }, 10, 'top')
@@ -86,7 +87,8 @@ const classic = (c: Ctx, p: ClassicMeme) => {
 const caption = (c: Ctx, p: CaptionMeme) => {
   background(c, WHITE)
   const b = captionTop(c, p.caption)
-  c.els.push(...scene(b, artFor(p.caption, p.topic)))
+  const art = artFor(p.caption, p.topic)
+  c.els.push(...scene(b, art, { meme: { id: memeFor(art, p.caption) } }))
 }
 
 const choice = (c: Ctx, p: ChoiceMeme) => {
@@ -98,7 +100,7 @@ const choice = (c: Ctx, p: ChoiceMeme) => {
     { box: bottom, text: p.yes, icon: 'thumbs-up', fill: '#1f8f5a', face: 'cool' as Face }
   ].forEach((row, i) => {
     const half = row.box.w / 2
-    c.els.push(...scene({ x: row.box.x, y: row.box.y, w: half, h: row.box.h }, artFor(row.text, p.topic, { face: row.face }), { size: 0.7, name: i === 0 ? 'Picture: no' : 'Picture: yes' }))
+    c.els.push(...scene({ x: row.box.x, y: row.box.y, w: half, h: row.box.h }, artFor(row.text, p.topic, { face: row.face }), { size: 0.7, name: i === 0 ? 'Picture: no' : 'Picture: yes', meme: { id: 'drake', region: i === 0 ? [0, 0, 0.5, 0.5] : [0, 0.5, 0.5, 1] } }))
     const d = c.u * 11
     const bx = c.u * 2.5
     const by = row.box.y + c.u * 2.5
@@ -120,7 +122,7 @@ const brain = (c: Ctx, p: BrainMeme) => {
     const half = b.w * 0.5
     plain(c, p.steps[i], { x: b.x + pad, y: b.y + pad, w: half - pad * 2, h: b.h - pad * 2 }, 5.6, { bold: i === 3, valign: 'middle', name: `Level ${i + 1}` })
     const pic = { x: b.x + half, y: b.y, w: half, h: b.h }
-    c.els.push(...scene(pic, { face: BRAIN_FACES[i], who: 'blob', prop: 'brain' }, { size: 0.86, name: `Picture level ${i + 1}` }))
+    c.els.push(...scene(pic, { face: BRAIN_FACES[i], who: 'blob', prop: 'brain' }, { size: 0.86, name: `Picture level ${i + 1}`, meme: { id: 'gb', region: [0.5, i / 4, 1, (i + 1) / 4] } }))
     if (i) {
       const glow = i * c.u * 0.8
       c.els.push(rect(r(pic.x + glow / 2), r(pic.y + glow / 2), r(pic.w - glow), r(pic.h - glow), 'transparent', { name: 'Glow', stroke: BRAIN_GLOW[i], strokeWidth: r(glow) }))
@@ -139,7 +141,8 @@ const nobody = (c: Ctx, p: NobodyMeme) => {
     { gap: 0, fill: 0 }
   )
   const top = r(used.y + used.h + m * 0.8)
-  c.els.push(...scene({ x: 0, y: top, w: c.W, h: c.H - top }, artFor(p.me, p.topic)))
+  const art = artFor(p.me, p.topic)
+  c.els.push(...scene({ x: 0, y: top, w: c.W, h: c.H - top }, art, { meme: { id: memeFor(art, p.me) } }))
 }
 
 const post = (c: Ctx, p: PostMeme) => {
@@ -208,7 +211,7 @@ const versus = (c: Ctx, p: VersusMeme) => {
       parts[i],
       [
         P(label, { role: 'head', size: 4.6, color: c.t.onAccent }, { fill: c.t.accent, padX: 3, padY: 1.2, name: 'Label', radius: 1.5 }),
-        E(photoH, (x, y, w, h) => scene({ x, y, w, h }, arts[i], { radius: c.u * 2, size: 0.8, name: `Picture ${i + 1}` })),
+        E(photoH, (x, y, w, h) => scene({ x, y, w, h }, arts[i], { radius: c.u * 2, size: 0.8, name: `Picture ${i + 1}`, meme: { id: memeFor(arts[i], text) } })),
         T(text, { role: 'body', size: 4, align: 'center', color: c.t.ink, style: c.t.body.boldOk === false ? 'normal' : 'bold', name: 'Caption' })
       ],
       { align: 'center', gap: 2.5, valign: 'middle', fill: 0 }
@@ -222,23 +225,30 @@ const labels = (c: Ctx, p: LabelsMeme) => {
     background(c, WHITE)
     area = captionTop(c, p.caption, 0.2)
   } else background(c, INK)
-  c.els.push(...backdrop(area, 'love'))
   const w = area.w * 0.29
-  const h = area.h * 0.2
+  const h = area.h * 0.18
+  // Laid out like the distracted-boyfriend photo: the new thing on the left, "me" in the middle, the old thing on the right.
   const spots: Box[] = [
-    { x: area.x + c.u * 3, y: area.y + area.h * 0.6, w, h },
-    { x: area.x + area.w * 0.355, y: area.y + area.h * 0.1, w, h },
-    { x: area.x + area.w - c.u * 3 - w, y: area.y + area.h * 0.52, w, h }
+    { x: area.x + area.w * 0.355, y: area.y + area.h * 0.05, w, h },
+    { x: area.x + c.u * 3, y: area.y + area.h * 0.58, w, h },
+    { x: area.x + area.w - c.u * 3 - w, y: area.y + area.h * 0.58, w, h }
   ]
-  // The one doing the looking sits above the first label; the two things it looks at sit by the others.
   const who = artFor(p.labels[0], p.topic, { face: 'love' })
-  const cs = Math.min(area.w * 0.32, area.h * 0.42)
-  c.els.push(...character(spots[0].x + (w - cs) / 2, spots[0].y - cs * 1.02, cs, who, { prop: false }))
-  const d = Math.min(area.w * 0.22, area.h * 0.26)
+  const cs = Math.min(area.w * 0.36, area.h * 0.5)
+  const d = Math.min(area.w * 0.2, area.h * 0.24)
   const a = artFor(p.labels[1], '', { propFrom: p.labels[1] })
   const b = artFor(p.labels[2], '', { propFrom: p.labels[2] })
-  c.els.push(...propBadge(spots[1].x + (w - d) / 2, spots[1].y + h + c.u * 2, d, a.prop ?? 'sparkles', 'love'))
-  c.els.push(...propBadge(spots[2].x + (w - d) / 2, spots[2].y - d - c.u * 2, d, b.prop === a.prop ? 'list-checks' : (b.prop ?? 'sparkles'), 'cry'))
+  c.els.push(
+    ...picture(
+      [
+        ...backdrop(area, 'love'),
+        ...character(area.x + (area.w - cs) / 2, spots[0].y + h + c.u, cs, who, { prop: false }),
+        ...propBadge(spots[1].x + (w - d) / 2, spots[1].y - d - c.u * 2, d, a.prop ?? 'sparkles', 'love'),
+        ...propBadge(spots[2].x + (w - d) / 2, spots[2].y - d - c.u * 2, d, b.prop === a.prop ? 'list-checks' : (b.prop ?? 'sparkles'), 'cry')
+      ],
+      { id: 'db' }
+    )
+  )
   p.labels.forEach((label, i) => memeText(c, label, spots[i], 6.2, 'middle'))
 }
 
@@ -307,14 +317,16 @@ const align = (c: Ctx, p: AlignMeme) => {
 const sign = (c: Ctx, p: SignMeme) => {
   background(c, INK)
   const art = artFor(p.sign, p.topic, { face: 'smug' })
-  c.els.push(...scene({ x: 0, y: 0, w: c.W, h: c.H }, art, { size: 0.56, cy: 0.38, prop: false }))
+  const pic = scene({ x: 0, y: 0, w: c.W, h: c.H }, art, { size: 0.56, cy: 0.38, prop: false, meme: { id: 'cmm' } })
+  c.els.push(...pic)
   const w = c.W * 0.72
   const h = c.H * 0.27
   const x = (c.W - w) / 2
   const y = c.H - h - c.u * 7
   c.els.push(rect(r(x), r(y), r(w), r(h), WHITE, { name: 'Sign', cornerRadius: r(c.u * 1), stroke: '#2a2d37', strokeWidth: r(c.u * 0.6) }))
   const hand = c.u * 7
-  for (const hx of [x + w * 0.16, x + w * 0.84 - hand]) c.els.push(ellipse(r(hx), r(y - hand * 0.45), r(hand), r(hand), skinOf(art.who), { name: 'Hand', stroke: OUTLINE, strokeWidth: r(c.u * 0.4) }))
+  // The hands belong to the drawn picture, so they go with it if it is swapped for a photo.
+  for (const hx of [x + w * 0.16, x + w * 0.84 - hand]) c.els.push(ellipse(r(hx), r(y - hand * 0.45), r(hand), r(hand), skinOf(art.who), { name: 'Hand', stroke: OUTLINE, strokeWidth: r(c.u * 0.4), groupId: pic[0].groupId }))
   plain(c, p.sign, { x: x + c.u * 4, y: y + c.u * 3, w: w - c.u * 8, h: h - c.u * 6 }, 5.6, { bold: true, align: 'center', valign: 'middle', name: 'Sign text' })
 }
 
@@ -330,7 +342,7 @@ const buttons = (c: Ctx, p: ButtonsMeme) => {
     c.els.push(rect(r(b.x), r(b.y), r(b.w), r(b.h), '#d93a3f', { name: 'Button', cornerRadius: r(c.u * 3), stroke: '#8f1d21', strokeWidth: r(c.u * 0.6) }))
     plain(c, label, { x: b.x + c.u * 3, y: b.y + c.u * 2, w: b.w - c.u * 6, h: b.h - c.u * 4 }, 4.8, { bold: true, color: WHITE, align: 'center', valign: 'middle', name: 'Button text' })
   })
-  c.els.push(...scene({ x: 0, y: panelH, w: c.W, h: c.H - panelH }, artFor(p.caption, `${p.a} ${p.b} ${p.topic}`, { face: 'nervous' }), { size: 0.66, cy: 0.42 }))
+  c.els.push(...scene({ x: 0, y: panelH, w: c.W, h: c.H - panelH }, artFor(p.caption, `${p.a} ${p.b} ${p.topic}`, { face: 'nervous' }), { size: 0.66, cy: 0.42, meme: { id: 'ds', region: [0, 0.5, 1, 1] } }))
   const cm = c.u * 3.5
   memeText(c, p.caption, { x: cm, y: c.H - cm - c.H * 0.16, w: c.W - cm * 2, h: c.H * 0.16 }, 8, 'bottom')
 }
@@ -393,9 +405,10 @@ const comic = (c: Ctx, p: ComicMeme) => {
     cols(c, row, [1, 1], 1.5).forEach((cell, ci) => {
       const k = ri * 2 + ci
       const capH = c.u * 13
+      const art = artFor(p.panels[k], p.topic, { fallback: COMIC_FACES[k] })
       c.els.push(rect(r(cell.x), r(cell.y), r(cell.w), r(capH), WHITE, { name: 'Caption box' }))
       plain(c, p.panels[k], { x: cell.x + c.u * 2.5, y: cell.y + c.u * 1.5, w: cell.w - c.u * 5, h: capH - c.u * 3 }, 3.6, { bold: true, align: 'center', valign: 'middle', name: `Panel ${k + 1} text` })
-      c.els.push(...scene({ x: cell.x, y: cell.y + capH, w: cell.w, h: cell.h - capH }, artFor(p.panels[k], p.topic, { fallback: COMIC_FACES[k] }), { size: 0.8, name: `Panel ${k + 1} picture` }))
+      c.els.push(...scene({ x: cell.x, y: cell.y + capH, w: cell.w, h: cell.h - capH }, art, { size: 0.8, name: `Panel ${k + 1} picture`, meme: { id: memeFor(art, p.panels[k]) } }))
     })
   )
 }

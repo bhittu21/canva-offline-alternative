@@ -335,43 +335,15 @@ export function character(x: number, y: number, s: number, art: Art, o: { mini?:
   return group(els)
 }
 
-/** Sun rays from the middle of a box, clipped to its edges. */
-function rays(b: Box, count: number, color: string, opacity: number): DesignElement {
-  const cx = b.w / 2
-  const cy = b.h / 2
-  const edge = (a: number) => {
-    const dx = Math.cos(a)
-    const dy = Math.sin(a)
-    const t = Math.min(dx ? Math.abs(cx / dx) : Infinity, dy ? Math.abs(cy / dy) : Infinity)
-    return [cx + dx * t, cy + dy * t]
-  }
-  const corners = [
-    [b.w, b.h],
-    [0, b.h],
-    [0, 0],
-    [b.w, 0]
-  ]
-  const cornerAngle = corners.map(([px, py]) => (Math.atan2(py - cy, px - cx) + Math.PI * 2) % (Math.PI * 2))
-  const step = (Math.PI * 2) / count
-  let d = ''
-  for (let i = 0; i < count; i++) {
-    const a0 = i * step
-    const a1 = a0 + step / 2
-    const pts = [[cx, cy], edge(a0)]
-    corners.forEach((corner, ci) => {
-      if (cornerAngle[ci] > a0 && cornerAngle[ci] < a1) pts.push(corner)
-    })
-    pts.push(edge(a1))
-    d += `M${pts.map(([px, py]) => `${r(px)} ${r(py)}`).join('L')}Z`
-  }
-  return path(d, [r(b.w), r(b.h)], r(b.x), r(b.y), r(b.w), r(b.h), color, { strokeWidth: 0, opacity, name: 'Rays' })
-}
-
-/** A mood-coloured box with sun rays (rays only on square-cornered boxes, since they are not clipped). */
+/** A mood-coloured box with two soft light spots (kept inside the box, since shapes are not clipped). */
 export function backdrop(b: Box, face: Face, o: { mini?: boolean; rays?: boolean; radius?: number; name?: string } = {}): DesignElement[] {
   const mood = MOODS[FACES[face].mood]
-  const els: DesignElement[] = [rect(r(b.x), r(b.y), r(b.w), r(b.h), mood.bg[1], { name: o.name ?? 'Picture background', gradient: linear(90, ...mood.bg), ...(o.radius ? { cornerRadius: r(o.radius) } : {}) })]
-  if (o.rays !== false && !o.radius) els.push(rays(b, o.mini ? 12 : 16, mood.rays, mood.raysOpacity))
+  const els: DesignElement[] = [rect(r(b.x), r(b.y), r(b.w), r(b.h), mood.bg[1], { name: o.name ?? 'Picture background', gradient: linear(120, ...mood.bg), ...(o.radius ? { cornerRadius: r(o.radius) } : {}) })]
+  if (o.rays !== false) {
+    const d = Math.min(b.w, b.h)
+    els.push(ellipse(r(b.x + d * 0.06), r(b.y + d * 0.06), r(d * 0.46), r(d * 0.46), '#ffffff', { name: 'Light', opacity: mood.raysOpacity * 0.55 }))
+    els.push(ellipse(r(b.x + b.w - d * 0.5), r(b.y + b.h - d * 0.5), r(d * 0.44), r(d * 0.44), mood.ink, { name: 'Light', opacity: 0.1 }))
+  }
   return els
 }
 
@@ -380,14 +352,70 @@ export function backdrop(b: Box, face: Face, o: { mini?: boolean; rays?: boolean
  * the character. `size` is the character's share of the box's shorter side,
  * and `cy` where its middle sits (share of the height).
  */
-export function scene(b: Box, art: Art, o: { size?: number; cy?: number; mini?: boolean; prop?: boolean; rays?: boolean; radius?: number; name?: string } = {}): DesignElement[] {
-  const els = backdrop(b, art.face, o)
+export function scene(b: Box, art: Art, o: { size?: number; cy?: number; mini?: boolean; prop?: boolean; rays?: boolean; radius?: number; name?: string; meme?: MemePick } = {}): DesignElement[] {
+  const els = backdrop(b, art.face, { ...o, rays: o.rays !== false && !o.mini })
   const s = Math.min(b.w, b.h) * (o.size ?? 0.74)
   const x = b.x + (b.w - s) / 2
   const y = b.y + b.h * (o.cy ?? 0.5) - s / 2
   if (!o.mini) els.push(ellipse(r(x + s * 0.2), r(y + s * 0.9), r(s * 0.6), r(s * 0.09), '#000000', { name: 'Shadow', opacity: 0.12 }))
   els.push(...character(x, y, s, art, { mini: o.mini, prop: o.prop }))
-  return els
+  return picture(els, o.meme ?? { id: memeFor(art) })
+}
+
+// ------------------------------------------------------------ real meme pictures
+
+/**
+ * Which real meme picture (a memegen.link template id) can stand in for a
+ * drawn picture when the person turns real meme pictures on. `region` picks
+ * a part of the picture (left, top, right, bottom as shares), for templates
+ * with several panels.
+ */
+export interface MemePick {
+  id: string
+  region?: [number, number, number, number]
+}
+
+/** The first element of each drawn picture remembers its real-picture stand-in. */
+export const memePicks = new WeakMap<DesignElement, MemePick>()
+
+/** Makes one movable group of a drawn picture and remembers its real-picture stand-in. */
+export function picture(els: DesignElement[], pick: MemePick): DesignElement[] {
+  const grouped = group(els)
+  if (grouped[0]) memePicks.set(grouped[0], pick)
+  return grouped
+}
+
+const FACE_MEMES: Record<Face, string> = {
+  nope: 'drake',
+  laugh: 'disastergirl',
+  happy: 'success',
+  party: 'success',
+  love: 'doge',
+  shock: 'fine',
+  nervous: 'harold',
+  cry: 'sadfrog',
+  sleepy: 'grumpycat',
+  angry: 'grumpycat',
+  smug: 'rollsafe',
+  side: 'kermit',
+  think: 'fry',
+  cool: 'stonks',
+  dead: 'fine',
+  meh: 'officespace'
+}
+
+const TEXT_MEMES: [RegExp, string][] = [
+  [/no idea/, 'noidea'],
+  [/everywhere/, 'buzz'],
+  [/\bboth\b/, 'both'],
+  [/money|payday|bank|budget|wallet|broke/, 'stonks'],
+  [/on fire|crash|storage|error/, 'fine']
+]
+
+/** A real meme picture that fits a drawn character's reaction. */
+export function memeFor(art: Art, text = ''): string {
+  const t = text.toLowerCase()
+  return TEXT_MEMES.find(([re]) => re.test(t))?.[1] ?? FACE_MEMES[art.face]
 }
 
 /** A big topic icon in a white circle, used where a meme labels things rather than people. */

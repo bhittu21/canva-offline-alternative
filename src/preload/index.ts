@@ -26,6 +26,11 @@ const api: EditorApi = {
     check: (key) => invoke('remove-bg-check', key),
     run: (bytes, mime) => invoke('remove-bg-run', bytes, mime)
   },
+  memes: {
+    list: () => invoke('memes-list'),
+    image: (id) => invoke('memes-image', id),
+    clearCache: () => invoke('memes-clear-cache')
+  },
   photos: {
     state: () => invoke('photos-state'),
     setKey: (provider, key) => invoke('photos-set-key', provider, key),

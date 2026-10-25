@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bhittu21.github.io/canva-offline-alternative/sitemap.xml

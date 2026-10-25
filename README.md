@@ -14,6 +14,8 @@
 <img src="https://img.shields.io/badge/works-100%25%20offline-7b5cff" alt="Works 100% offline" />
 <img src="https://img.shields.io/badge/login-not%20needed-ff5757" alt="No login needed" />
 
+**[🌐 Website](https://bhittu21.github.io/canva-offline-alternative/)**
+
 <img src="docs/images/screenshots/03-editor.png" alt="Design Studio editor in dark mode with a summer sale Instagram post open and the text settings panel on the right" width="100%" />
 
 </div>
@@ -145,7 +147,7 @@ Unsaved work is saved in the background every few seconds. When you open Design 
 Yes. Fonts installed on Windows appear automatically, and you can add font files. Drag photos in, paste them, or import them from your PC.
 
 **Does it run on Mac or Linux?**
-Not yet. Design Studio is made for Windows 10 and 11 (64-bit).
+A macOS app is coming. Today you can already run Design Studio on macOS and any Linux distro from its source code with VS Code, without the Windows installer. The steps are on the [website](https://bhittu21.github.io/canva-offline-alternative/#run-from-source).
 
 **Is it safe? Windows warned me.**
 The warning appears because the installer is not code-signed yet, which costs money for new projects. The app is built from the code in this repository by GitHub's own build servers.
@@ -170,7 +172,7 @@ Press **?** in the app for the full list, or **Ctrl+K** to search every command.
 - Text in PDF downloads is not selectable (SVG keeps text as text).
 - No video, animation, real-time collaboration or cloud sync.
 - Magic eraser, upscaling and image expansion are planned.
-- Windows only for now.
+- The installer is Windows only for now; macOS and Linux can run it from source.
 
 See the [roadmap](docs/ROADMAP.md) for what's coming. Ideas and bug reports are welcome in [Issues](https://github.com/bhittu21/canva-offline-alternative/issues). If Design Studio helps you, a ⭐ star helps others find it.
 

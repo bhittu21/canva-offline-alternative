@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Design Studio: Free Offline Canva Alternative for Windows | Download</title>
+    <meta
+      name="description"
+      content="Download Design Studio, a free offline design app for Windows 10 and 11. 1,190 editable templates for social posts, presentations, posters and résumés. No login, 100% private, optional AI."
+    />
+    <link rel="canonical" href="https://bhittu21.github.io/canva-offline-alternative/" />
+    <meta name="theme-color" content="#0b0d14" />
+    <link rel="icon" type="image/png" href="docs/images/logo.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Design Studio" />
+    <meta property="og:title" content="Design Studio: Free Offline Canva Alternative for Windows" />
+    <meta property="og:description" content="1,190 editable templates, no login, 100% private. Design social posts, presentations, posters and résumés on your PC." />
+    <meta property="og:url" content="https://bhittu21.github.io/canva-offline-alternative/" />
+    <meta property="og:image" content="https://bhittu21.github.io/canva-offline-alternative/docs/images/social-preview.png" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="640" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Design Studio: Free Offline Canva Alternative for Windows" />
+    <meta name="twitter:description" content="1,190 editable templates, no login, 100% private. Download free for Windows." />
+    <meta name="twitter:image" content="https://bhittu21.github.io/canva-offline-alternative/docs/images/social-preview.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Design Studio",
+        "description": "A free offline graphic design app for Windows with 1,190 editable templates, no login and optional AI.",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Windows 10, Windows 11",
+        "softwareVersion": "1.0.0",
+        "downloadUrl": "https://github.com/bhittu21/canva-offline-alternative/releases/latest/download/Design-Studio-Setup.exe",
+        "image": "https://bhittu21.github.io/canva-offline-alternative/docs/images/screenshots/03-editor.png",
+        "url": "https://bhittu21.github.io/canva-offline-alternative/",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "Is Design Studio free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. There is no subscription, no trial and no watermark." } },
+          { "@type": "Question", "name": "Does Design Studio work without internet?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Templates, editing, fonts, icons, saving and downloading all work offline. Internet is only used for optional extras you turn on." } },
+          { "@type": "Question", "name": "Do I need an account?", "acceptedAnswer": { "@type": "Answer", "text": "No. Install it and start designing. There is no login." } },
+          { "@type": "Question", "name": "Is Design Studio available for macOS or Linux?", "acceptedAnswer": { "@type": "Answer", "text": "A macOS app is coming. Today you can already run Design Studio on macOS and Linux from its source code with Node.js and VS Code, without the Windows installer." } }
+        ]
+      }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+
+    <style>
+      :root {
+        --bg: #07080d;
+        --bg-2: #0d1018;
+        --card: rgba(255, 255, 255, 0.045);
+        --card-border: rgba(255, 255, 255, 0.09);
+        --text: #f3f4fa;
+        --text-2: #b5bad0;
+        --text-3: #80869c;
+        --violet: #7b5cff;
+        --blue: #2f6bff;
+        --cyan: #1eb8ff;
+        --pink: #e066d8;
+        --grad: linear-gradient(120deg, #2f4bff 0%, #7b5cff 45%, #c04cf5 75%, #e066d8 100%);
+        --grad-soft: linear-gradient(120deg, rgba(47, 75, 255, 0.18), rgba(192, 76, 245, 0.18));
+        --radius: 14px;
+        --radius-lg: 22px;
+        --pill: 999px;
+        --nav-h: 68px;
+        --font: 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        --display: 'Space Grotesk', 'Manrope', 'Segoe UI', sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: calc(var(--nav-h) + 16px);
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font);
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+
+      /* Colour glows behind everything */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background:
+          radial-gradient(900px 600px at 10% -10%, rgba(47, 75, 255, 0.35), transparent 60%),
+          radial-gradient(800px 600px at 95% 5%, rgba(192, 76, 245, 0.28), transparent 60%),
+          radial-gradient(900px 700px at 50% 110%, rgba(30, 184, 255, 0.14), transparent 60%),
+          var(--bg);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      img {
+        max-width: 100%;
+        display: block;
+      }
+
+      .wrap {
+        width: min(1180px, 100% - 32px);
+        margin-inline: auto;
+      }
+
+      /* ----- Glass navbar ----- */
+
+      .nav {
+        position: sticky;
+        top: 12px;
+        z-index: 50;
+        margin: 12px auto 0;
+        width: min(1180px, 100% - 24px);
+        height: var(--nav-h);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 0 12px 0 18px;
+        border-radius: 20px;
+        background: linear-gradient(120deg, rgba(47, 75, 255, 0.16), rgba(123, 92, 255, 0.1) 50%, rgba(224, 102, 216, 0.14)), rgba(13, 16, 26, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        -webkit-backdrop-filter: blur(18px) saturate(170%);
+        backdrop-filter: blur(18px) saturate(170%);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        font-family: var(--display);
+        font-weight: 700;
+        font-size: 19px;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+      }
+
+      .brand img {
+        width: 34px;
+        height: 34px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 4px;
+        margin-left: 14px;
+      }
+
+      .nav-links a {
+        padding: 8px 14px;
+        border-radius: var(--pill);
+        color: var(--text-2);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14.5px;
+        transition: background 0.2s, color 0.2s;
+      }
+
+      .nav-links a:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+      }
+
+      .nav-spacer {
+        flex: 1;
+      }
+
+      .version-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 11px;
+        border-radius: var(--pill);
+        background: rgba(18, 200, 140, 0.12);
+        border: 1px solid rgba(18, 200, 140, 0.35);
+        color: #6ef0c0;
+        font-size: 12.5px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .version-chip::before {
+        content: '';
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #2be3a3;
+        box-shadow: 0 0 10px #2be3a3;
+      }
+
+      /* ----- Buttons ----- */
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 11px 20px;
+        border-radius: var(--pill);
+        border: 1px solid transparent;
+        font: inherit;
+        font-weight: 700;
+        font-size: 15px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+        white-space: nowrap;
+      }
+
+      .btn:focus-visible {
+        outline: 3px solid rgba(123, 92, 255, 0.6);
+        outline-offset: 2px;
+      }
+
+      .btn-primary {
+        background: var(--grad);
+        color: #fff;
+        box-shadow: 0 8px 28px rgba(123, 92, 255, 0.45);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 36px rgba(123, 92, 255, 0.6);
+      }
+
+      .btn-glass {
+        background: rgba(255, 255, 255, 0.07);
+        border-color: rgba(255, 255, 255, 0.14);
+        color: var(--text);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+      }
+
+      .btn-glass:hover {
+        background: rgba(255, 255, 255, 0.13);
+      }
+
+      .btn-sm {
+        padding: 8px 15px;
+        font-size: 14px;
+      }
+
+      .btn-xl {
+        padding: 17px 30px;
+        font-size: 18px;
+      }
+
+      .btn svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+
+      /* ----- Hero ----- */
+
+      .hero {
+        text-align: center;
+        padding: 72px 0 40px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        border-radius: var(--pill);
+        background: var(--grad-soft);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text-2);
+        font-size: 13.5px;
+        font-weight: 600;
+      }
+
+      h1 {
+        font-family: var(--display);
+        font-size: clamp(38px, 6.4vw, 74px);
+        line-height: 1.04;
+        letter-spacing: -0.03em;
+        margin: 22px auto 18px;
+        max-width: 900px;
+      }
+
+      .grad-text {
+        background: var(--grad);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .lead {
+        font-size: clamp(17px, 2vw, 20px);
+        color: var(--text-2);
+        max-width: 700px;
+        margin: 0 auto 34px;
+      }
+
+      .cta {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .download-meta {
+        margin-top: 16px;
+        color: var(--text-3);
+        font-size: 14px;
+      }
+
+      .download-meta strong {
+        color: var(--text-2);
+      }
+
+      .trust {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin: 26px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .trust li {
+        padding: 7px 14px;
+        border-radius: var(--pill);
+        background: var(--card);
+        border: 1px solid var(--card-border);
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-2);
+      }
+
+      .hero-shot {
+        margin: 56px auto 0;
+        border-radius: var(--radius-lg);
+        padding: 8px;
+        background: linear-gradient(140deg, rgba(47, 75, 255, 0.55), rgba(123, 92, 255, 0.25) 40%, rgba(224, 102, 216, 0.5));
+        box-shadow: 0 40px 120px rgba(80, 60, 255, 0.35);
+      }
+
+      .hero-shot img {
+        border-radius: 16px;
+        width: 100%;
+        height: auto;
+      }
+
+      /* ----- Sections ----- */
+
+      section {
+        padding: 84px 0 0;
+      }
+
+      .section-head {
+        text-align: center;
+        max-width: 720px;
+        margin: 0 auto 40px;
+      }
+
+      h2 {
+        font-family: var(--display);
+        font-size: clamp(30px, 4vw, 44px);
+        line-height: 1.12;
+        letter-spacing: -0.02em;
+        margin: 0 0 12px;
+      }
+
+      .section-head p {
+        color: var(--text-2);
+        margin: 0;
+        font-size: 17px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .card {
+        padding: 24px;
+        border-radius: var(--radius-lg);
+        background: var(--card);
+        border: 1px solid var(--card-border);
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+      }
+
+      .card h3 {
+        margin: 14px 0 6px;
+        font-size: 18px;
+        letter-spacing: -0.01em;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--text-2);
+        font-size: 15px;
+      }
+
+      .icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 13px;
+        display: grid;
+        place-items: center;
+        background: var(--grad-soft);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        font-size: 22px;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+      }
+
+      .stat {
+        text-align: center;
+        padding: 22px 12px;
+        border-radius: var(--radius-lg);
+        background: var(--card);
+        border: 1px solid var(--card-border);
+      }
+
+      .stat b {
+        display: block;
+        font-family: var(--display);
+        font-size: 34px;
+        line-height: 1.1;
+      }
+
+      .stat span {
+        color: var(--text-3);
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      /* ----- Screenshot tour ----- */
+
+      .tour {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .shot {
+        margin: 0;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        background: var(--card);
+        border: 1px solid var(--card-border);
+      }
+
+      .shot img {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 10;
+        object-fit: cover;
+        object-position: top left;
+      }
+
+      .shot figcaption {
+        padding: 14px 18px 16px;
+        color: var(--text-2);
+        font-size: 15px;
+      }
+
+      .shot figcaption strong {
+        display: block;
+        color: var(--text);
+        font-size: 16px;
+      }
+
+      /* ----- Platforms ----- */
+
+      .platforms {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 16px;
+      }
+
+      .platform {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .platform .tag {
+        align-self: flex-start;
+        padding: 4px 11px;
+        border-radius: var(--pill);
+        font-size: 12.5px;
+        font-weight: 700;
+      }
+
+      .tag-ready {
+        background: rgba(18, 200, 140, 0.14);
+        color: #6ef0c0;
+      }
+
+      .tag-soon {
+        background: rgba(255, 184, 77, 0.14);
+        color: #ffcf7a;
+      }
+
+      .tag-source {
+        background: rgba(30, 184, 255, 0.14);
+        color: #7fd6ff;
+      }
+
+      .platform .btn {
+        margin-top: auto;
+        align-self: flex-start;
+      }
+
+      .steps {
+        margin-top: 18px;
+        padding: 28px;
+      }
+
+      .steps h3 {
+        margin-top: 0;
+      }
+
+      .steps ol {
+        margin: 0;
+        padding-left: 22px;
+        color: var(--text-2);
+      }
+
+      .steps li {
+        margin-bottom: 12px;
+      }
+
+      .steps li strong {
+        color: var(--text);
+      }
+
+      code,
+      pre {
+        font-family: 'Cascadia Code', 'SFMono-Regular', Consolas, monospace;
+      }
+
+      pre {
+        margin: 10px 0 0;
+        padding: 14px 16px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid var(--card-border);
+        color: #d8dcf0;
+        font-size: 14px;
+        overflow-x: auto;
+      }
+
+      p code,
+      li code {
+        padding: 2px 7px;
+        border-radius: 7px;
+        background: rgba(255, 255, 255, 0.08);
+        font-size: 0.9em;
+        color: var(--text);
+      }
+
+      .note {
+        margin-top: 14px;
+        font-size: 14px;
+        color: var(--text-3);
+      }
+
+      /* ----- Privacy table ----- */
+
+      .table-wrap {
+        overflow-x: auto;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--card-border);
+        background: var(--card);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 15px;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--card-border);
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--text-3);
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      td {
+        color: var(--text-2);
+      }
+
+      td:first-child {
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      /* ----- FAQ ----- */
+
+      .faq {
+        max-width: 820px;
+        margin: 0 auto;
+        display: grid;
+        gap: 10px;
+      }
+
+      details {
+        border-radius: var(--radius);
+        background: var(--card);
+        border: 1px solid var(--card-border);
+        padding: 4px 20px;
+      }
+
+      summary {
+        cursor: pointer;
+        padding: 14px 0;
+        font-weight: 700;
+        font-size: 16.5px;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      summary::-webkit-details-marker {
+        display: none;
+      }
+
+      summary::after {
+        content: '+';
+        color: var(--violet);
+        font-size: 22px;
+        line-height: 1;
+      }
+
+      details[open] summary::after {
+        content: '–';
+      }
+
+      details p {
+        margin: 0 0 16px;
+        color: var(--text-2);
+      }
+
+      /* ----- Final CTA and footer ----- */
+
+      .final {
+        margin-top: 90px;
+        padding: 56px 24px;
+        text-align: center;
+        border-radius: 28px;
+        background: linear-gradient(120deg, rgba(47, 75, 255, 0.3), rgba(123, 92, 255, 0.22) 50%, rgba(224, 102, 216, 0.3));
+        border: 1px solid rgba(255, 255, 255, 0.14);
+      }
+
+      .final h2 {
+        margin-bottom: 10px;
+      }
+
+      .final p {
+        color: var(--text-2);
+        margin: 0 0 26px;
+      }
+
+      footer {
+        padding: 48px 0 40px;
+        color: var(--text-3);
+        font-size: 13.5px;
+        text-align: center;
+      }
+
+      footer nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        margin-bottom: 18px;
+      }
+
+      footer nav a {
+        padding: 6px 13px;
+        border-radius: var(--pill);
+        text-decoration: none;
+        color: var(--text-2);
+        background: var(--card);
+        border: 1px solid var(--card-border);
+      }
+
+      footer nav a:hover {
+        color: var(--text);
+      }
+
+      /* ----- Small screens ----- */
+
+      @media (max-width: 920px) {
+        .nav-links {
+          display: none;
+        }
+        .grid,
+        .platforms {
+          grid-template-columns: 1fr 1fr;
+        }
+        .platforms .platform:first-child {
+          grid-column: 1 / -1;
+        }
+        .stats {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .nav {
+          padding: 0 8px 0 12px;
+          gap: 8px;
+        }
+        .brand span {
+          display: none;
+        }
+        .grid,
+        .tour,
+        .platforms {
+          grid-template-columns: 1fr;
+        }
+        .hero {
+          padding-top: 48px;
+        }
+        .btn-xl {
+          width: 100%;
+          padding: 16px 20px;
+          font-size: 17px;
+        }
+        section {
+          padding-top: 64px;
+        }
+        .steps {
+          padding: 20px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        .btn {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="nav" aria-label="Main">
+      <a class="brand" href="#top" aria-label="Design Studio home">
+        <img src="docs/images/logo.png" alt="" width="34" height="34" />
+        <span>Design Studio</span>
+      </a>
+      <nav class="nav-links" aria-label="Sections">
+        <a href="#features">Features</a>
+        <a href="#tour">Tour</a>
+        <a href="#platforms">macOS &amp; Linux</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <span class="nav-spacer"></span>
+      <span class="version-chip" data-version-chip>Latest version</span>
+      <a class="btn btn-primary btn-sm" data-download href="https://github.com/bhittu21/canva-offline-alternative/releases/latest/download/Design-Studio-Setup.exe">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14" /></svg>
+        Download
+      </a>
+    </header>
+
+    <main id="top">
+      <div class="wrap hero">
+        <span class="eyebrow">✨ Free · Offline · No login · Windows 10 &amp; 11</span>
+        <h1>Design anything on your PC, <span class="grad-text">even without internet</span></h1>
+        <p class="lead">
+          Design Studio is a free, offline Canva alternative for Windows. Make social media posts, presentations, posters, menus and résumés with
+          1,190 ready-made templates. Your designs never leave your computer.
+        </p>
+        <div class="cta">
+          <a class="btn btn-primary btn-xl" data-download href="https://github.com/bhittu21/canva-offline-alternative/releases/latest/download/Design-Studio-Setup.exe">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5l7.5-1v7H3v-6zm0 13l7.5 1v-7H3v6zm8.5 1.1L21 21v-8.5h-9.5v7.1zm0-15.2v7.1H21V3l-9.5 1.4z" /></svg>
+            <span data-download-label>Download for Windows</span>
+          </a>
+          <a class="btn btn-glass btn-xl" href="https://github.com/bhittu21/canva-offline-alternative">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 015 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0012 2z" /></svg>
+            View on GitHub
+          </a>
+        </div>
+        <p class="download-meta" data-download-meta>Windows 10 and 11 (64-bit) · Free · Always the newest version</p>
+        <ul class="trust">
+          <li>🔒 100% private</li>
+          <li>✈️ Works offline</li>
+          <li>🙅 No account</li>
+          <li>💸 No subscription or watermark</li>
+        </ul>
+        <div class="hero-shot">
+          <img
+            src="docs/images/screenshots/03-editor.png"
+            width="1440"
+            height="900"
+            alt="Design Studio editor in dark mode with a summer sale post being edited, design tabs at the top and text settings on the right"
+          />
+        </div>
+      </div>
+
+      <section id="features" class="wrap">
+        <div class="section-head">
+          <h2>Everything you need to design, built in</h2>
+          <p>Drag-and-drop simple, like the online design tools you know, but on your own PC.</p>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <div class="icon" aria-hidden="true">🎨</div>
+            <h3>1,190 editable templates</h3>
+            <p>Social posts, stories, slides, posters, flyers, menus, résumés, certificates, calendars and worksheets. Change every word, colour and photo.</p>
+          </article>
+          <article class="card">
+            <div class="icon" aria-hidden="true">🗂️</div>
+            <h3>Tabs for every design</h3>
+            <p>Open several designs at once and switch like browser tabs. Each tab keeps its own undo history.</p>
+          </article>
+          <article class="card">
+            <div class="icon" aria-hidden="true">💾</div>
+            <h3>Never lose your work</h3>
+            <p>Unsaved work is kept safe automatically and comes back when you reopen the app, even after a crash.</p>
+          </article>
+          <article class="card">
+            <div class="icon" aria-hidden="true">🔤</div>
+            <h3>Your fonts, your brand</h3>
+            <p>Fonts installed on your PC appear automatically. Add .ttf or .otf files, and save brand colours, fonts and logos.</p>
+          </article>
+          <article class="card">
+            <div class="icon" aria-hidden="true">📊</div>
+            <h3>Elements, icons and charts</h3>
+            <p>Shapes, lines, arrows, frames, about 1,900 icons, plus charts and tables you can type your own numbers into.</p>
+          </article>
+          <article class="card">
+            <div class="icon" aria-hidden="true">🤖</div>
+            <h3>AI ready, your way</h3>
+            <p>Optional AI to design, write and fix layouts. Use a free AI on your PC (Ollama, LM Studio) or your own API key.</p>
+          </article>
+        </div>
+        <div class="stats">
+          <div class="stat"><b class="grad-text">1,190</b><span>ready-made templates</span></div>
+          <div class="stat"><b class="grad-text">1,900+</b><span>icons</span></div>
+          <div class="stat"><b class="grad-text">5</b><span>download formats: PNG, JPG, WebP, SVG, PDF</span></div>
+          <div class="stat"><b class="grad-text">0</b><span>accounts, ads or watermarks</span></div>
+        </div>
+      </section>
+
+      <section id="tour" class="wrap">
+        <div class="section-head">
+          <h2>Take a look inside</h2>
+          <p>Real screenshots of Design Studio in dark mode.</p>
+        </div>
+        <div class="tour">
+          <figure class="shot">
+            <img src="docs/images/screenshots/01-home.png" width="1440" height="900" loading="lazy" alt="Home screen with quick-start sizes, blank designs and template search" />
+            <figcaption><strong>Start in seconds</strong>Pick a size or search templates like “menu” or “resume”.</figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="docs/images/screenshots/02-templates.png" width="1440" height="900" loading="lazy" alt="Template gallery with categories for social posts, presentations, business and education" />
+            <figcaption><strong>1,190 templates</strong>Original, fully editable, sorted into easy categories.</figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="docs/images/screenshots/16-slides-pages.png" width="1440" height="900" loading="lazy" alt="Multi-page pitch deck with page thumbnails and several design tabs open" />
+            <figcaption><strong>Slides and multi-page designs</strong>Presentations, carousels and documents with page thumbnails.</figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="docs/images/screenshots/10-ai-studio.png" width="1440" height="900" loading="lazy" alt="AI Studio panel with design, write, layout and photo assistants next to a résumé" />
+            <figcaption><strong>AI Studio</strong>Describe a design, rewrite text or tidy a layout. You review before anything changes.</figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="docs/images/screenshots/09-brand-kit.png" width="1440" height="900" loading="lazy" alt="Brand kit with brand colours, fonts and logos next to a cafe menu" />
+            <figcaption><strong>Brand kit</strong>Apply your colours, fonts and logo in one click.</figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="docs/images/screenshots/12-export.png" width="1440" height="900" loading="lazy" alt="Download dialog with PNG, JPG, WebP, SVG and PDF options" />
+            <figcaption><strong>Download in any format</strong>PNG, JPG, WebP, SVG or PDF, any size, any pages.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="platforms" class="wrap">
+        <div class="section-head">
+          <h2>Windows today. macOS on the way.</h2>
+          <p>The Windows installer is ready. A macOS app is coming, and you can already run Design Studio on macOS and Linux from its source code, without the .exe.</p>
+        </div>
+        <div class="platforms">
+          <article class="card platform">
+            <span class="tag tag-ready">Ready to download</span>
+            <h3>Windows 10 &amp; 11</h3>
+            <p>One installer, no admin rights needed. Adds desktop and Start menu shortcuts.</p>
+            <a class="btn btn-primary" data-download href="https://github.com/bhittu21/canva-offline-alternative/releases/latest/download/Design-Studio-Setup.exe">Download .exe</a>
+          </article>
+          <article class="card platform">
+            <span class="tag tag-soon">macOS app coming soon</span>
+            <h3>macOS</h3>
+            <p>A native offline macOS app is planned. Until then, run it from source with VS Code in a few minutes.</p>
+            <a class="btn btn-glass" href="#run-from-source">Run on macOS</a>
+          </article>
+          <article class="card platform">
+            <span class="tag tag-source">Run from source</span>
+            <h3>Linux (any distro)</h3>
+            <p>Ubuntu, Fedora, Debian, Arch, Mint and others. Same steps as macOS, no installer needed.</p>
+            <a class="btn btn-glass" href="#run-from-source">Run on Linux</a>
+          </article>
+        </div>
+
+        <div id="run-from-source" class="card steps">
+          <h3>Run Design Studio on macOS or Linux with VS Code</h3>
+          <ol>
+            <li>
+              Install <strong>Node.js LTS</strong> from <a href="https://nodejs.org">nodejs.org</a>, <strong>Git</strong> from
+              <a href="https://git-scm.com/downloads">git-scm.com</a> and <strong>Visual Studio Code</strong> from
+              <a href="https://code.visualstudio.com">code.visualstudio.com</a>.
+            </li>
+            <li>
+              Open VS Code, press <code>Ctrl+Shift+P</code> (<code>Cmd+Shift+P</code> on a Mac), choose <strong>Git: Clone</strong> and paste:
+              <pre>https://github.com/bhittu21/canva-offline-alternative</pre>
+              Pick a folder and click <strong>Open</strong> when VS Code asks.
+            </li>
+            <li>
+              Open the terminal with <strong>Terminal › New Terminal</strong> and run:
+              <pre>npm install
+npm run dev</pre>
+              The first run downloads what it needs once (a few hundred MB). After that, Design Studio opens and works offline.
+            </li>
+            <li>Next time, open the folder in VS Code and run <code>npm run dev</code> again. To update, run <code>git pull</code> and <code>npm install</code> first.</li>
+          </ol>
+          <p class="note">
+            On some Linux systems (for example Ubuntu 24.04) the window may not open because of a security setting. Then start it with
+            <code>npx electron-vite dev -- --no-sandbox</code>. We have tested these steps on Linux. On macOS the same steps should work, but we have not tested them on a Mac yet.
+          </p>
+        </div>
+      </section>
+
+      <section id="privacy" class="wrap">
+        <div class="section-head">
+          <h2>100% private by design</h2>
+          <p>No login, no cloud, no tracking. Online extras are optional, use your own keys, and only run after you say yes.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Optional extra</th>
+                <th>Works with</th>
+                <th>What is sent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>AI design and writing</td>
+                <td>Ollama or LM Studio on your PC (nothing leaves it), or your own key for Gemini, Groq, OpenRouter, OpenAI, Claude</td>
+                <td>Only the text you type and the page size</td>
+              </tr>
+              <tr>
+                <td>Stock photos</td>
+                <td>Unsplash, Pexels (free keys)</td>
+                <td>Your search words</td>
+              </tr>
+              <tr>
+                <td>Remove background</td>
+                <td>remove.bg (your key)</td>
+                <td>The image you choose</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note" style="text-align: center">Keys are encrypted on your PC and never saved into your designs or exports.</p>
+      </section>
+
+      <section id="faq" class="wrap">
+        <div class="section-head">
+          <h2>Questions</h2>
+        </div>
+        <div class="faq">
+          <details>
+            <summary>Is Design Studio really free?</summary>
+            <p>Yes. No subscription, no trial and no watermark. If you connect a paid AI service with your own key, that service bills you directly.</p>
+          </details>
+          <details>
+            <summary>Does it work without internet?</summary>
+            <p>Yes. Templates, editing, fonts, icons, saving and downloading all work offline. Internet is only used for optional extras you turn on.</p>
+          </details>
+          <details>
+            <summary>Do I need an account?</summary>
+            <p>No. Install it and start designing.</p>
+          </details>
+          <details>
+            <summary>Windows says “Windows protected your PC”. Is it safe?</summary>
+            <p>The message appears because the installer is new and not code-signed yet. Click <strong>More info</strong>, then <strong>Run anyway</strong>. The installer is built from the public source code by GitHub's own servers.</p>
+          </details>
+          <details>
+            <summary>Is there a macOS or Linux version?</summary>
+            <p>A macOS app is coming. Today you can run Design Studio on macOS and Linux from its source code with VS Code. See the steps above.</p>
+          </details>
+          <details>
+            <summary>Is this Canva?</summary>
+            <p>No. Design Studio is an independent app inspired by easy design tools like Canva. It does not use Canva's code, templates, images or servers.</p>
+          </details>
+          <details>
+            <summary>How do I get updates?</summary>
+            <p>The download button always gives you the newest version. Install it over your current version; your designs are kept.</p>
+          </details>
+        </div>
+      </section>
+
+      <div class="wrap">
+        <div class="final">
+          <h2>Start designing in two minutes</h2>
+          <p data-final-meta>Free download for Windows 10 and 11. No account needed.</p>
+          <div class="cta">
+            <a class="btn btn-primary btn-xl" data-download href="https://github.com/bhittu21/canva-offline-alternative/releases/latest/download/Design-Studio-Setup.exe">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14" /></svg>
+              <span data-download-label>Download for Windows</span>
+            </a>
+            <a class="btn btn-glass btn-xl" href="https://github.com/bhittu21/canva-offline-alternative/releases">All versions</a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="wrap">
+      <nav aria-label="Footer">
+        <a href="https://github.com/bhittu21/canva-offline-alternative">GitHub</a>
+        <a href="https://github.com/bhittu21/canva-offline-alternative/releases">Releases</a>
+        <a href="https://github.com/bhittu21/canva-offline-alternative/issues">Report a problem</a>
+        <a href="https://github.com/bhittu21/canva-offline-alternative/blob/main/docs/ROADMAP.md">Roadmap</a>
+      </nav>
+      <p>
+        Design Studio is an independent project and is not affiliated with, endorsed by or sponsored by Canva. Canva is a trademark of Canva Pty Ltd.
+      </p>
+    </footer>
+
+    <script>
+      // Shows the newest release's version, date and size. The download links
+      // point at /releases/latest/download/, so they work even if this fails.
+      ;(function () {
+        var api = 'https://api.github.com/repos/bhittu21/canva-offline-alternative/releases/latest'
+        function show(release) {
+          var version = String(release.tag_name || '').replace(/^v/, '')
+          if (!version) return
+          var asset = (release.assets || []).filter(function (a) { return /\.exe$/i.test(a.name) })[0]
+          var size = asset ? Math.round(asset.size / 1048576) + ' MB' : ''
+          var date = release.published_at ? new Date(release.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : ''
+          document.querySelectorAll('[data-version-chip]').forEach(function (el) { el.textContent = 'v' + version })
+          document.querySelectorAll('[data-download-label]').forEach(function (el) { el.textContent = 'Download v' + version + ' for Windows' })
+          var parts = ['<strong>Version ' + version + '</strong>']
+          if (date) parts.push('released ' + date)
+          if (size) parts.push(size)
+          parts.push('Windows 10 and 11 (64-bit)')
+          var meta = document.querySelector('[data-download-meta]')
+          if (meta) meta.innerHTML = parts.join(' · ')
+          var fin = document.querySelector('[data-final-meta]')
+          if (fin) fin.textContent = 'Version ' + version + (date ? ', released ' + date : '') + '. Free for Windows 10 and 11. No account needed.'
+        }
+        try {
+          var cached = JSON.parse(sessionStorage.getItem('ds-release') || 'null')
+          if (cached && Date.now() - cached.at < 10 * 60 * 1000) return show(cached.release)
+        } catch (e) {}
+        fetch(api, { headers: { Accept: 'application/vnd.github+json' } })
+          .then(function (r) { return r.ok ? r.json() : null })
+          .then(function (release) {
+            if (!release) return
+            show(release)
+            try {
+              sessionStorage.setItem('ds-release', JSON.stringify({ at: Date.now(), release: { tag_name: release.tag_name, published_at: release.published_at, assets: (release.assets || []).map(function (a) { return { name: a.name, size: a.size } }) } }))
+            } catch (e) {}
+          })
+          .catch(function () {})
+      })()
+    </script>
+  </body>
+</html>

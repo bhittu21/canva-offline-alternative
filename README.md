@@ -56,7 +56,10 @@ Pick a size (Instagram post, story, YouTube thumbnail, A4, presentation, poster,
 ### 1,408 ready-made templates
 Every template is original and was checked to make sure all its text and shapes can be edited. Categories include social media posts, Instagram and Facebook stories, YouTube thumbnails and banners, flyers and posters, invitations and cards, business cards, letterheads, invoices, certificates, résumés and cover letters, planners, calendars, worksheets, presentations, menus and price lists.
 
-**New: 218 meme templates.** Classic top and bottom text, POV captions, two choices, expanding brain, starter packs, tier lists, alignment charts, Venn diagrams, funny charts, four-panel comics and more. All captions are original, and the photo spots are empty frames: drop in your own picture and the meme is ready.
+### 218 meme templates
+Classic top and bottom text, POV captions, two choices, expanding brain, nobody / me, starter packs, tier lists, alignment charts, Venn diagrams, funny charts, four-panel comics and more. Every meme comes with an original cartoon reaction picture that matches the joke, and all the words are original. Change the caption, or delete the picture and drop in your own photo.
+
+<img src="docs/images/screenshots/18-memes.png" alt="Meme templates in Design Studio with cartoon reaction faces, cats and dogs" width="100%" />
 
 <img src="docs/images/screenshots/02-templates.png" alt="Template gallery with categories such as social posts, presentations, business, documents, planners and education" width="100%" />
 

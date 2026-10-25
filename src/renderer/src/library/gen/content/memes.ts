@@ -11,6 +11,8 @@ interface MemeBase {
   id: string
   title: string
   kw: string
+  /** The meme's subject in a few words; picks the picture. */
+  topic: string
   mood: Mood[]
 }
 
@@ -76,7 +78,7 @@ export const classicMemes: ClassicMeme[] = (
     ['Spider', 'Saw a spider', 'Now I live here forever on edge', 'spider fear'],
     ['Weekday', 'It is only Tuesday', 'Feels like a whole month', 'week work']
   ] as const
-).map(([title, top, bottom, kw]) => ({ id: slug(title), title: `${title} meme`, kw: kwOf('classic top bottom text impact', kw), mood: fun, top, bottom }))
+).map(([title, top, bottom, kw]) => ({ id: slug(title), title: `${title} meme`, topic: kw, kw: kwOf('classic top bottom text impact', kw), mood: fun, top, bottom }))
 
 // ---------------------------------------------------------------- caption above a photo
 
@@ -118,7 +120,7 @@ export const captionMemes: CaptionMeme[] = (
     ['The dog when you say the word “walk”', 'dog pets'],
     ['The cat at 3 AM for no reason', 'cat pets night']
   ] as const
-).map(([caption, kw]) => ({ id: slug(caption), title: caption.length > 42 ? `${caption.slice(0, 40).trim()}…` : caption, kw: kwOf('caption pov when me reaction', kw), mood: fun, caption }))
+).map(([caption, kw]) => ({ id: slug(caption), title: caption.length > 42 ? `${caption.slice(0, 40).trim()}…` : caption, topic: kw, kw: kwOf('caption pov when me reaction', kw), mood: fun, caption }))
 
 // ---------------------------------------------------------------- two-panel choice (no / yes)
 
@@ -143,7 +145,7 @@ export const choiceMemes: ChoiceMeme[] = (
     ['Simple password', 'Password nobody can remember, including me', 'computer internet'],
     ['A normal sleep schedule', 'Chaos', 'sleep']
   ] as const
-).map(([no, yes, kw]) => ({ id: slug(`${no} vs ${yes}`), title: `${no.slice(0, 26)} vs ${yes.slice(0, 22)} meme`, kw: kwOf('two panel choice approve disapprove prefer', kw), mood: fun, no, yes }))
+).map(([no, yes, kw]) => ({ id: slug(`${no} vs ${yes}`), title: `${no.slice(0, 26)} vs ${yes.slice(0, 22)} meme`, topic: kw, kw: kwOf('two panel choice approve disapprove prefer', kw), mood: fun, no, yes }))
 
 // ---------------------------------------------------------------- expanding brain
 
@@ -160,7 +162,7 @@ export const brainMemes: BrainMeme[] = (
     ['Ways to reply to a text', ['Replying right away', 'Replying later', 'Reading it in the notification', 'Replying in your head'], 'texting phone'],
     ['Ways to clean your room', ['Cleaning it', 'Hiding things in the closet', 'Turning off the light', 'Moving out'], 'cleaning home']
   ] as const
-).map(([title, steps, kw]) => ({ id: slug(title), title: `${title} brain meme`, kw: kwOf('expanding brain levels galaxy smart', kw), mood: fun, steps: [...steps] as [string, string, string, string] }))
+).map(([title, steps, kw]) => ({ id: slug(title), title: `${title} brain meme`, topic: kw, kw: kwOf('expanding brain levels galaxy smart', kw), mood: fun, steps: [...steps] as [string, string, string, string] }))
 
 // ---------------------------------------------------------------- nobody / me
 
@@ -179,7 +181,7 @@ export const nobodyMemes: NobodyMeme[] = (
     ['Nobody:', 'My laptop fan during one browser tab: TAKE-OFF', 'computer'],
     ['Nobody:', 'Me: saying “we should hang out” and never planning it', 'friends']
   ] as const
-).map(([setup, me, kw], i) => ({ id: `nobody-${i + 1}-${slug(kw)}`, title: `Nobody / me meme: ${kw}`, kw: kwOf('nobody me absolutely no one', kw), mood: fun, setup, me }))
+).map(([setup, me, kw], i) => ({ id: `nobody-${i + 1}-${slug(kw)}`, title: `Nobody / me meme: ${kw}`, topic: kw, kw: kwOf('nobody me absolutely no one', kw), mood: fun, setup, me }))
 
 // ---------------------------------------------------------------- social post screenshot
 
@@ -201,7 +203,7 @@ export const postMemes: PostMeme[] = (
     ['Weather Watcher', '@umbrella_forgot', 'the forecast said sunny. the sky said: no', 'weather'],
     ['Sleep Scientist', '@nap_enthusiast', 'naps are just tiny vacations you take every afternoon', 'nap']
   ] as const
-).map(([name, handle, text, kw]) => ({ id: slug(handle), title: `${name} post meme`, kw: kwOf('tweet post screenshot text social', kw), mood: fun, name, handle, text }))
+).map(([name, handle, text, kw]) => ({ id: slug(handle), title: `${name} post meme`, topic: kw, kw: kwOf('tweet post screenshot text social', kw), mood: fun, name, handle, text }))
 
 // ---------------------------------------------------------------- side by side
 
@@ -223,7 +225,7 @@ export const versusMemes: VersusMeme[] = (
     ['Teacher is here', 'Teacher left the room', 'Silent angels', 'Total chaos', 'school'],
     ['Weekday me', 'Weekend me', 'Up at 6', 'Up at noon', 'sleep weekend']
   ] as const
-).map(([la, lb, a, b, kw]) => ({ id: slug(`${la} ${lb} ${kw} ${a}`), title: `${la} vs ${lb}: ${kw} meme`, kw: kwOf('expectation reality how it started how its going comparison', kw), mood: fun, la, lb, a, b }))
+).map(([la, lb, a, b, kw]) => ({ id: slug(`${la} ${lb} ${kw} ${a}`), title: `${la} vs ${lb}: ${kw} meme`, topic: kw, kw: kwOf('expectation reality how it started how its going comparison', kw), mood: fun, la, lb, a, b }))
 
 // ---------------------------------------------------------------- labelled photo
 
@@ -242,7 +244,7 @@ export const labelMemes: LabelsMeme[] = (
     [['Me', 'Another episode', 'Sleep'], undefined, 'tv'],
     [['Team', 'Last minute changes', 'The deadline'], undefined, 'work']
   ] as const
-).map(([labels, caption, kw], i) => ({ id: `labels-${i + 1}-${slug(kw)}`, title: `Labelled photo meme: ${kw}`, kw: kwOf('labels labelled photo object distracted', kw), mood: fun, labels: [...labels] as [string, string, string], ...(caption ? { caption } : {}) }))
+).map(([labels, caption, kw], i) => ({ id: `labels-${i + 1}-${slug(kw)}`, title: `Labelled photo meme: ${kw}`, topic: kw, kw: kwOf('labels labelled photo object distracted', kw), mood: fun, labels: [...labels] as [string, string, string], ...(caption ? { caption } : {}) }))
 
 // ---------------------------------------------------------------- starter packs
 
@@ -259,7 +261,7 @@ export const starterMemes: StarterMeme[] = (
     ['Coffee lover starter pack', ['Three mugs on the desk', 'Coffee grinder', 'Cafe loyalty card', 'Shaky hands', '“Just one more cup”', 'Latte art attempt'], 'coffee'],
     ['New parent starter pack', ['No sleep', 'Cold coffee', 'Baby wipes everywhere', '400 photos a day', 'Lullaby on repeat', 'Snack in one hand'], 'parents family']
   ] as const
-).map(([head, items, kw]) => ({ id: slug(head), title: head, kw: kwOf('starter pack collection', kw), mood: fun, head, items: [...items] }))
+).map(([head, items, kw]) => ({ id: slug(head), title: head, topic: kw, kw: kwOf('starter pack collection', kw), mood: fun, head, items: [...items] }))
 
 // ---------------------------------------------------------------- tier lists
 
@@ -274,7 +276,7 @@ export const tierMemes: TierMeme[] = (
     ['Weekend activities tier list', [['S', 'Sleeping in'], ['A', 'Brunch'], ['B', 'Movie night'], ['C', 'Chores'], ['D', 'Setting an alarm']], 'weekend'],
     ['Phone notifications tier list', [['S', 'Payment received'], ['A', 'Friend’s message'], ['B', 'Delivery update'], ['C', 'App update'], ['D', 'Storage full']], 'phone']
   ] as const
-).map(([head, rows, kw]) => ({ id: slug(head), title: head, kw: kwOf('tier list ranking s a b c d', kw), mood: fun, head, rows: rows.map(([a, b]) => [a, b] as [string, string]) }))
+).map(([head, rows, kw]) => ({ id: slug(head), title: head, topic: kw, kw: kwOf('tier list ranking s a b c d', kw), mood: fun, head, rows: rows.map(([a, b]) => [a, b] as [string, string]) }))
 
 // ---------------------------------------------------------------- alignment charts
 
@@ -287,7 +289,7 @@ export const alignMemes: AlignMeme[] = (
     ['Pet behaviour alignment chart', 'pets cat dog'],
     ['Student alignment chart', 'school']
   ] as const
-).map(([head, kw]) => ({ id: slug(head), title: head, kw: kwOf('alignment chart lawful chaotic good evil', kw), mood: fun, head, cells: alignAxes }))
+).map(([head, kw]) => ({ id: slug(head), title: head, topic: kw, kw: kwOf('alignment chart lawful chaotic good evil', kw), mood: fun, head, cells: alignAxes }))
 
 // ---------------------------------------------------------------- opinion sign
 
@@ -304,7 +306,7 @@ export const signMemes: SignMeme[] = (
     ['Dark mode makes code run faster', 'coding'],
     ['Five-minute breaks should be twenty', 'work']
   ] as const
-).map(([sign, kw]) => ({ id: slug(sign), title: `Opinion sign meme: ${sign.slice(0, 30)}`, kw: kwOf('change my mind opinion sign hot take', kw), mood: fun, sign }))
+).map(([sign, kw]) => ({ id: slug(sign), title: `Opinion sign meme: ${sign.slice(0, 30)}`, topic: kw, kw: kwOf('change my mind opinion sign hot take', kw), mood: fun, sign }))
 
 // ---------------------------------------------------------------- two buttons dilemma
 
@@ -321,7 +323,7 @@ export const buttonMemes: ButtonsMeme[] = (
     ['Finish the game', 'Start a new game', 'Me as a gamer', 'gaming'],
     ['Wake up', 'Snooze again', 'Me every morning', 'morning']
   ] as const
-).map(([a, b, caption, kw]) => ({ id: slug(`${a} or ${b}`), title: `${a} or ${b} meme`, kw: kwOf('two buttons dilemma choice sweating hard decision', kw), mood: fun, a, b, caption }))
+).map(([a, b, caption, kw]) => ({ id: slug(`${a} or ${b}`), title: `${a} or ${b} meme`, topic: kw, kw: kwOf('two buttons dilemma choice sweating hard decision', kw), mood: fun, a, b, caption }))
 
 // ---------------------------------------------------------------- funny charts
 
@@ -340,7 +342,7 @@ export const chartMemes: ChartMeme[] = (
     ['Time spent choosing a movie vs watching it', 'bar', ['Choosing', 'Watching'], [70, 30], undefined, 'movie tv'],
     ['How my code works', 'donut', ['Logic', 'Copy and paste', 'Hope', 'Coffee'], [15, 30, 35, 20], undefined, 'coding']
   ] as const
-).map(([head, chart, labels, values, note, kw]) => ({ id: slug(head), title: `${head} chart meme`, kw: kwOf('chart graph statistics funny data', kw), mood: fun, head, chart, labels: [...labels], values: [...values], ...(note ? { note } : {}) }))
+).map(([head, chart, labels, values, note, kw]) => ({ id: slug(head), title: `${head} chart meme`, topic: kw, kw: kwOf('chart graph statistics funny data', kw), mood: fun, head, chart, labels: [...labels], values: [...values], ...(note ? { note } : {}) }))
 
 // ---------------------------------------------------------------- venn diagrams
 
@@ -355,7 +357,7 @@ export const vennMemes: VennMeme[] = (
     ['My playlist', 'Songs I love', 'Songs I skip', 'The same three songs', 'music'],
     ['Coffee', 'Tastes good', 'Keeps me awake', 'Why I am still awake at 2 AM', 'coffee']
   ] as const
-).map(([head, a, b, mid, kw]) => ({ id: slug(`venn ${head}`), title: `${head} Venn diagram meme`, kw: kwOf('venn diagram overlap', kw), mood: fun, head, a, b, mid }))
+).map(([head, a, b, mid, kw]) => ({ id: slug(`venn ${head}`), title: `${head} Venn diagram meme`, topic: kw, kw: kwOf('venn diagram overlap', kw), mood: fun, head, a, b, mid }))
 
 // ---------------------------------------------------------------- four-panel comics
 
@@ -370,4 +372,4 @@ export const comicMemes: ComicMeme[] = (
     [['Opens the game for 10 minutes', 'Just one level', 'The sun is up', 'Worth it'], 'gaming'],
     [['Cleans the room', 'Finds old photos', 'Looks at every photo', 'Room is messier'], 'cleaning']
   ] as const
-).map(([panels, kw], i) => ({ id: `comic-${i + 1}-${slug(kw)}`, title: `Four-panel meme: ${kw}`, kw: kwOf('four panel comic story', kw), mood: fun, panels: [...panels] as [string, string, string, string] }))
+).map(([panels, kw], i) => ({ id: `comic-${i + 1}-${slug(kw)}`, title: `Four-panel meme: ${kw}`, topic: kw, kw: kwOf('four panel comic story', kw), mood: fun, panels: [...panels] as [string, string, string, string] }))

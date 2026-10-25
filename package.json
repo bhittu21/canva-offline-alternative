@@ -1,7 +1,7 @@
 {
   "name": "design-studio",
   "productName": "Design Studio",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Design Studio: a free, offline design app for Windows. A private Canva alternative with 1,408 templates, no login and optional AI.",
   "author": "Abir",

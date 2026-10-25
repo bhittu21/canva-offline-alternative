@@ -1,6 +1,10 @@
-## Design Studio 1.0.0
+## Design Studio 1.1.0
 
-The first public release of Design Studio, a free design app for Windows that works offline.
+**New: 218 meme templates** in a new Memes category: classic top and bottom text, POV captions, two choices, expanding brain, starter packs, tier lists, alignment charts, Venn diagrams, funny charts, four-panel comics and more. Each one has an original cartoon reaction picture that fits the joke. Every word and picture can be changed.
+
+Also: template previews on the Home and Templates screens now show the whole design instead of cutting off the bottom of tall ones.
+
+Design Studio is a free design app for Windows that works offline.
 
 **Download:** `Design-Studio-Setup.exe` below. Double-click it to install. No account and no administrator rights needed.
 

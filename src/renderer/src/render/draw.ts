@@ -78,7 +78,8 @@ export function drawShape(c: Ctx, el: ShapeElement): void {
     c.strokeStyle = el.stroke
     c.lineWidth = el.strokeWidth
     c.lineJoin = 'round'
-    c.lineCap = el.dash === 'dotted' ? 'round' : 'butt'
+    // Drawn paths (doodles, illustrations) end in round caps; boxes keep crisp corners.
+    c.lineCap = el.dash === 'dotted' || el.shape === 'path' ? 'round' : 'butt'
     c.setLineDash(dashArray(el.dash, el.strokeWidth))
     c.stroke(path)
   }

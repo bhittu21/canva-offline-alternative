@@ -2668,6 +2668,8 @@ input[type='range']::-webkit-slider-thumb {
 .design-card .thumb {
   display: grid;
   place-items: center;
+  /* A definite track so tall previews shrink to fit instead of being cut off. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   aspect-ratio: 4 / 3;
   padding: 12px;
   border-radius: 12px;

@@ -65,7 +65,7 @@ export async function exportSvg(
         const geo = shapeGeometry(el)
         const stroke =
           el.strokeWidth > 0 && isVisibleColor(el.stroke) && el.shape !== 'line'
-            ? ` stroke="${attr(el.stroke)}" stroke-width="${num(el.strokeWidth)}" stroke-linejoin="round"${dashAttr(dashArray(el.dash, el.strokeWidth), el.dash)}`
+            ? ` stroke="${attr(el.stroke)}" stroke-width="${num(el.strokeWidth)}" stroke-linejoin="round"${el.shape === 'path' && el.dash !== 'dotted' ? ' stroke-linecap="round"' : ''}${dashAttr(dashArray(el.dash, el.strokeWidth), el.dash)}`
             : ''
         inner = `<path d="${geo.d}" fill="${paint(el.fill, el.gradient, el.width, el.height)}"${geo.evenOdd ? ' fill-rule="evenodd"' : ''}${stroke}/>`
         break
